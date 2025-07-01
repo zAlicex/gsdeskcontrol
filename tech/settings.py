@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     '18.232.148.219',
     'localhost',
     '10.0.0.154',
+    '44.214.252.203',
 ]
 
 # Security settings
