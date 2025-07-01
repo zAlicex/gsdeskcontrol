@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Acionamentos{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+    <!-- Formulário à esquerda -->
+    <div class="lg:w-3/5">
+        <div class="bg-slate-200 rounded-lg shadow-lg p-6 mb-6">
+            <form method="post" action="{% url 'orcamento:lista_orcamentos' %}" class="orcamento-form" id="orcamentoForm">
+                {% csrf_token %}
+                <input type="hidden" name="orcamento_id" id="orcamento_id" value="">
+                
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold mb-4" id="form-title">Novo Acionamento</h2>
+                    <div class="flex gap-2">
+                        <a href="{% url 'orcamento:lista_orcamentos' %}" id="cancelEdit" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 text-sm" style="display: none;">Voltar</a>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                        <select name="nome_local" id="id_nome_local" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                            <option value="">Selecione...</option>
+                            {% for local in form.fields.nome_local.queryset %}
+                                <option value="{{ local.pk }}" {% if form.initial.nome_local == local.pk or form.data.nome_local == local.pk|stringformat:"s" %}selected{% endif %}>{{ local }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.nome_local.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.nome_local.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                        <select name="nome_usuarios" id="id_nome_usuarios" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                            <option value="">Selecione...</option>
+                            {% for usuario in form.fields.nome_usuarios.queryset %}
+                                <option value="{{ usuario.pk }}" {% if form.initial.nome_usuarios == usuario.pk or form.data.nome_usuarios == usuario.pk|stringformat:"s" %}selected{% endif %}>{{ usuario }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.nome_usuarios.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.nome_usuarios.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Acionamento</label>
+                        <input type="datetime-local" name="data_acionamento" id="id_data_acionamento" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500"
+                            value="{% if form.data_acionamento.value %}{{ form.data_acionamento.value|date:'Y-m-d\\TH:i' }}{% endif %}">
+                        {% if form.data_acionamento.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.data_acionamento.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Chegada</label>
+                        <input type="datetime-local" name="data_chegada" id="id_data_chegada" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500"
+                            value="{% if form.data_chegada.value %}{{ form.data_chegada.value|date:'Y-m-d\\TH:i' }}{% endif %}">
+                        {% if form.data_chegada.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.data_chegada.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SLA Resposta</label>
+                        <input type="text" name="sla_resposta" id="id_sla_resposta" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500" readonly
+                            value="{% if form.sla_resposta.value %}{{ form.sla_resposta.value }}{% endif %}">
+                        {% if form.sla_resposta.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ form.sla_resposta.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btn-novo" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Novo</button>
+                    <button type="submit" id="btn-salvar" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Pesquisa e Listagem à direita -->
+    <div class="lg:w-2/5 flex flex-col gap-6">
+        <div class="bg-slate-200 rounded-lg shadow-lg p-6">
+            <h2 class="text-lg font-bold mb-4">Pesquisar</h2>
+            <form method="get">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="PESQUISAR ACIONAMENTO" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+            </form>
+        </div>
+        <div id="orcamento-list-container" 
+             data-get-url-template="{% url 'orcamento:get_orcamento_data' 0 %}"
+             data-update-url-template="{% url 'orcamento:lista_orcamentos' %}"
+             class="bg-slate-200 rounded-lg shadow-lg p-6 flex-1">
+            <h2 class="text-lg font-bold mb-4">Listagem de Acionamentos</h2>
+            <div id="orcamento-list-results" class="max-h-96 overflow-y-auto">
+                <ul class="divide-y divide-gray-200">
+                    {% for orcamento in orcamentos %}
+                    <li class="orcamento-item py-3 px-4 cursor-pointer hover:bg-gray-50 border-l-4 border-transparent hover:border-blue-500 transition-all duration-200" 
+                        onclick="carregarOrcamento('{{ orcamento.pk }}')" 
+                        data-orcamento-id="{{ orcamento.pk }}">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800">{{ orcamento.nome_usuarios|default:"Sem usuário" }}</div>
+                                <div class="text-gray-500 text-sm">{{ orcamento.nome_local|default:"Sem local" }}</div>
+                                <div class="text-gray-400 text-xs mt-1">
+                                    <span class="font-medium">Acionamento:</span> {{ orcamento.data_acionamento|date:"d/m/Y H:i"|default:"Não informado" }}
+                                </div>
+                                {% if orcamento.data_chegada %}
+                                <div class="text-gray-400 text-xs">
+                                    <span class="font-medium">Chegada:</span> {{ orcamento.data_chegada|date:"d/m/Y H:i" }}
+                                </div>
+                                {% endif %}
+                                {% if orcamento.sla_resposta %}
+                                <div class="text-blue-600 text-xs font-medium">
+                                    <span class="font-medium">SLA:</span> {{ orcamento.sla_resposta }} horas
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4">
+                                <i class="fas fa-edit text-blue-500 text-lg"></i>
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="py-8 text-center text-gray-400">
+                        <i class="fas fa-inbox text-4xl mb-2"></i>
+                        <div>Nenhum orçamento cadastrado.</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.orcamento-item {
+    transition: all 0.2s ease-in-out;
+}
+
+.orcamento-item:hover {
+    transform: translateX(4px);
+}
+
+.orcamento-item.selected {
+    background-color: #dbeafe;
+    border-left-color: #3b82f6;
+}
+
+.orcamento-item.selected:hover {
+    background-color: #bfdbfe;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'orcamento/js/orcamento.js' %}?v={% now "U" %}"></script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tech Projects - Orpecas{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'orpecas/css/orpecas.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Coluna Esquerda - Formulário -->
+        <div class="lg:w-3/5 space-y-6">
+            <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+                 <form id="orpecasForm" method="post" action="{% url 'orpecas:orpecas' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="orpecas_id" value="">
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800" id="formTitle">Sensores</h3>
+                        <div class="flex gap-2">
+                            <button type="button" id="cancelEdit" class="btn-secondary text-sm" style="display: none;">Voltar</button>
+                            <button type="button" id="limparForm" class="btn-secondary text-sm">Limpar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Campos do Orpecas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                            {{ form.local }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Diagnóstico</label>
+                            {{ form.diagnostico }}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Botão Pânico</label>
+                            {{ form.botao_panico }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sensor</label>
+                            {{ form.sensor }}
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="btn-primary" id="submitBtn">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Coluna Direita - Lista e Busca -->
+        <div class="lg:w-2/5 space-y-6">
+            <!-- Busca -->
+            <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+                <form method="get" action="{% url 'orpecas:orpecas' %}">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Pesquisar</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por Local</label>
+                            <input type="text" name="search_local" id="search-local-input" value="{{ search_local }}" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por Diagnóstico</label>
+                            <input type="text" name="search_diagnostico" id="search-diagnostico-input" value="{{ search_diagnostico }}" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de Orpecas -->
+            <div id="orpecas-list-container" 
+                 data-get-url-template="{% url 'orpecas:get_orpecas' 0 %}"
+                 data-update-url-template="{% url 'orpecas:atualizar_orpecas' 0 %}"
+                 class="bg-white rounded-lg shadow-lg compact-form overflow-hidden">
+                <div class="p-6 border-b bg-slate-200">
+                     <h2 class="text-xl font-bold text-gray-800">Listagem de Sensores</h2>
+                </div>
+                <div id="orpecas-list-results" class="max-h-96 overflow-y-auto">
+                    {% include 'orpecas/partials/lista_orpecas.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'orpecas/js/orpecas.js' %}?v={% now "U" %}"></script>
+{% endblock %} 

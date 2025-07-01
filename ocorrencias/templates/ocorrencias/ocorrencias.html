@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tech Projects - Ocorrências{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'ocorrencias/css/ocorrencias.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Main Layout -->
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Left Column - Form (60%) -->
+        <div id="form-column" class="lg:w-3/5 space-y-6">
+            <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+                <form method="post" action="{% url 'ocorrencias:ocorrencias' %}" class="ocorrencia-form" id="ocorrenciaForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="ocorrencia_id" value="">
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800" id="formTitle">Nova Ocorrência</h3>
+                        <div class="flex gap-2">
+                            <a href="{% url 'ocorrencias:ocorrencias' %}" id="cancelEdit" class="btn-secondary text-sm" style="display: none;">Voltar</a>
+                        </div>
+                    </div>
+
+                    <!-- Seleção de Local (Cliente) -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                        <select name="local" id="local" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                            <option value="">Selecione um local</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data/Hora</label>
+                        <input type="datetime-local" name="data_hora" id="data_hora" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" id="status" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                            <option value="">Selecione o status</option>
+                            <option value="portas_abertas">Portas e Portões Abertos</option>
+                            <option value="inibicao_cameras">Inibição de Câmeras e Sensores</option>
+                            <option value="botao_panico">Acionamento indevido de Botão de Pânico</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                        <textarea name="observacoes" id="observacoes" rows="3" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="btn-primary" id="submitBtn">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Column - Ocorrências List (40%) -->
+        <div id="list-column" class="lg:w-2/5 space-y-6">
+            <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+                <form method="get" action="{% url 'ocorrencias:ocorrencias' %}">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Pesquisar</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">PESQUISAR LOCAL</label>
+                            <input type="text" name="search_local" id="search-local-input" value="{{ search_local }}" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">STATUS</label>
+                            <select name="search_status" id="search-status-input" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                                <option value="">Todos</option>
+                                <option value="portas_abertas" {% if search_status == 'portas_abertas' %}selected{% endif %}>Portas e Portões Abertos</option>
+                                <option value="inibicao_cameras" {% if search_status == 'inibicao_cameras' %}selected{% endif %}>Inibição de Câmeras e Sensores</option>
+                                <option value="botao_panico" {% if search_status == 'botao_panico' %}selected{% endif %}>Acionamento indevido de Botão de Pânico</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Ocorrências List -->
+            <div id="ocorrencia-list-container" 
+                 data-get-url-template="{% url 'ocorrencias:get_ocorrencia' 0 %}"
+                 data-update-url-template="{% url 'ocorrencias:atualizar_ocorrencia' 0 %}"
+                 class="bg-white rounded-lg shadow-lg compact-form overflow-hidden">
+                <div class="p-6 border-b bg-slate-200">
+                    <h2 class="text-xl font-bold text-gray-800">Listagem de Ocorrências</h2>
+                </div>
+                <div id="ocorrencia-list-results" class="max-h-96 overflow-y-auto">
+                    {% include 'ocorrencias/partials/lista_ocorrencias.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'ocorrencias/js/ocorrencias.js' %}?v={% now "U" %}"></script>
+{% endblock %} 

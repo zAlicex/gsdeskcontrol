@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Controle de Rondas{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'rondas/css/rondas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+    <!-- Formulário -->
+    <div class="lg:w-3/5 space-y-6">
+        <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+            <form id="rondaForm" method="post" action="{% url 'rondas:rondas' %}">
+                {% csrf_token %}
+                <input type="hidden" name="id" id="ronda_id" value="">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800" id="formTitle">Nova Ronda</h3>
+                    <div class="flex gap-2">
+                        <button type="button" id="cancelEdit" class="btn-secondary text-sm" style="display: none;">Voltar</button>
+                        <button type="button" id="limparForm" class="btn-secondary text-sm">Limpar</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label>Local</label>
+                        {{ form.local }}
+                    </div>
+                    <div>
+                        <label>Data/Hora</label>
+                        {{ form.data_hora }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label>Status</label>
+                        {{ form.status }}
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label>Observações</label>
+                    {{ form.observacoes }}
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="submit" class="btn-primary" id="submitBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Lista e Busca -->
+    <div class="lg:w-2/5 space-y-6">
+        <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
+            <form method="get">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Pesquisar</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label>Local</label>
+                        <input type="text" name="search_local" id="search-local-input" value="{{ search_local }}" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300">
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select name="search_status" id="search-status-input" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300">
+                            <option value="">Todos</option>
+                            <option value="realizado" {% if search_status == 'realizado' %}selected{% endif %}>Realizado</option>
+                            <option value="programado" {% if search_status == 'programado' %}selected{% endif %}>Programado</option>
+                            <option value="pendente" {% if search_status == 'pendente' %}selected{% endif %}>Pendente</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="ronda-list-container"
+             data-get-url-template="{% url 'rondas:get_ronda' 0 %}"
+             data-update-url-template="{% url 'rondas:atualizar_ronda' 0 %}"
+             class="bg-white rounded-lg shadow-lg compact-form overflow-hidden">
+            <div class="p-6 border-b bg-slate-200">
+                <h2 class="text-xl font-bold text-gray-800">Listagem de Rondas</h2>
+            </div>
+            <div id="ronda-list-results" class="max-h-96 overflow-y-auto">
+                {% include 'rondas/partials/lista_rondas.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'rondas/js/rondas.js' %}?v={% now 'U' %}"></script>
+{% endblock %} 

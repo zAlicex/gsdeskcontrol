@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - Tech Projects{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Seção de KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <!-- Card Faturamento (30d) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex items-center transition-transform transform hover:-translate-y-1">
+            <div class="bg-green-100 rounded-full p-4 mr-4">
+                <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Faturamento (30d)</p>
+                <p class="text-2xl font-bold text-gray-800">R$ {{ faturamento_30d|floatformat:2|intcomma }}</p>
+            </div>
+        </div>
+
+        <!-- Card Novos Clientes (30d) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex items-center transition-transform transform hover:-translate-y-1">
+            <div class="bg-blue-100 rounded-full p-4 mr-4">
+                <i class="fas fa-user-plus text-blue-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Novos Clientes (30d)</p>
+                <p class="text-2xl font-bold text-gray-800">{{ novos_clientes_30d }}</p>
+            </div>
+        </div>
+
+        <!-- Card Orçamentos Abertos -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex items-center transition-transform transform hover:-translate-y-1">
+            <div class="bg-yellow-100 rounded-full p-4 mr-4">
+                <i class="fas fa-folder-open text-yellow-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Orçamentos Abertos</p>
+                <p class="text-2xl font-bold text-gray-800">{{ orcamentos_abertos }}</p>
+            </div>
+        </div>
+        
+        <!-- Card Orçamentos Finalizados -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex items-center transition-transform transform hover:-translate-y-1">
+            <div class="bg-purple-100 rounded-full p-4 mr-4">
+                <i class="fas fa-check-circle text-purple-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Orçamentos Finalizados</p>
+                <p class="text-2xl font-bold text-gray-800">{{ orcamentos_finalizados }}</p>
+            </div>
+        </div>
+        
+        <!-- Card Total de Visitas -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex items-center transition-transform transform hover:-translate-y-1">
+            <div class="bg-red-100 rounded-full p-4 mr-4">
+                <i class="fas fa-street-view text-red-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total de Visitas</p>
+                <p class="text-2xl font-bold text-gray-800">{{ total_visitas }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção Central com Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Gráfico de Faturamento -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Faturamento Mensal (Realizado)</h3>
+            <div style="height: 300px;">
+                <canvas id="faturamentoChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Projeção -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Projeção de Faturamento (Aprovados)</h3>
+            <div style="height: 300px;">
+                <canvas id="projecaoChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção Inferior com Status e Top Clientes -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Gráfico de Status de Orçamentos -->
+        <div class="lg:col-span-1 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Distribuição de Orçamentos</h3>
+            <div style="height: 250px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabela de Top Clientes -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Top 5 Clientes por Faturamento</h3>
+            <ul class="space-y-4">
+                {% for cliente in top_clientes %}
+                <li class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="bg-slate-200 text-slate-600 rounded-full h-8 w-8 flex items-center justify-center text-sm font-bold mr-3">{{ forloop.counter }}</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">{{ cliente.nome|truncatechars:20 }}</p>
+                            <p class="text-xs text-gray-500">{{ cliente.telefone }}</p>
+                        </div>
+                    </div>
+                    <span class="font-bold text-green-600">R$ {{ cliente.total_gasto|floatformat:2|intcomma }}</span>
+                </li>
+                {% empty %}
+                <li>
+                    <p class="text-center text-gray-500">Nenhum dado de faturamento de cliente disponível.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const faturamentoData = JSON.parse('{{ faturamento_chart_data|escapejs }}');
+        const statusData = JSON.parse('{{ status_chart_data|escapejs }}');
+        const projecaoData = JSON.parse('{{ projecao_chart_data|escapejs }}');
+
+        // Configurações comuns de tooltip
+        const tooltipOptions = {
+            backgroundColor: '#1e293b',
+            titleColor: '#ffffff',
+            bodyColor: '#cbd5e1',
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false
+        };
+        
+        // --- Gráfico de Faturamento (Linha) ---
+        const faturamentoCtx = document.getElementById('faturamentoChart').getContext('2d');
+        new Chart(faturamentoCtx, {
+            type: 'line',
+            data: {
+                labels: faturamentoData.labels,
+                datasets: [{
+                    label: 'Faturamento',
+                    data: faturamentoData.data,
+                    backgroundColor: 'rgba(51, 65, 85, 0.1)',
+                    borderColor: '#334155',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#334155',
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: tooltipOptions },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                }
+            }
+        });
+
+        // --- Gráfico de Status (Rosca) ---
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusData.labels,
+                datasets: [{
+                    label: 'Status',
+                    data: statusData.data,
+                    backgroundColor: [
+                        '#fbbf24', // Amarelo (Aberto)
+                        '#22c55e', // Verde (Aprovado)
+                        '#ef4444', // Vermelho (Cancelado)
+                        '#8b5cf6'  // Roxo (Finalizado)
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#64748b',
+                            boxWidth: 12,
+                            padding: 15
+                        }
+                    },
+                    tooltip: tooltipOptions
+                }
+            }
+        });
+
+        // --- Gráfico de Projeção (Barra) ---
+        const projecaoCtx = document.getElementById('projecaoChart').getContext('2d');
+        new Chart(projecaoCtx, {
+            type: 'bar',
+            data: {
+                labels: projecaoData.labels,
+                datasets: [{
+                    label: 'Projeção de Faturamento',
+                    data: projecaoData.data,
+                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                    borderColor: '#16a34a',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: tooltipOptions },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+

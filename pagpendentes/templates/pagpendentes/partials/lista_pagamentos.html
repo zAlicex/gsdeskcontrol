@@ -1,0 +1,25 @@
+<ul class="divide-y divide-gray-200">
+    {% for item in itens %}
+    <li class="pagpendente-item py-3 px-4 cursor-pointer hover:bg-gray-50 border-l-4 border-transparent hover:border-blue-500 transition-all duration-200" 
+        onclick="carregarPagPendente('{{ item.pk }}')" 
+        data-pagpendente-id="{{ item.pk }}">
+        <div class="flex justify-between items-center">
+            <div class="flex-1">
+                <div class="font-semibold text-gray-800">{{ item.local|default:"Sem local" }}</div>
+                <div class="text-gray-500 text-sm">{{ item.data_hora|date:"d/m/Y H:i"|default:"Sem data" }}</div>
+                <div class="text-gray-400 text-xs mt-1">
+                    <span class="font-medium">Status:</span> {{ item.get_status_display }}
+                </div>
+            </div>
+            <div class="ml-4">
+                <i class="fas fa-edit text-blue-500 text-lg"></i>
+            </div>
+        </div>
+    </li>
+    {% empty %}
+    <li class="py-8 text-center text-gray-400">
+        <i class="fas fa-inbox text-4xl mb-2"></i>
+        <div>Nenhum pagamento pendente encontrado.</div>
+    </li>
+    {% endfor %}
+</ul> 

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if orcamento %}Editar Orçamento{% else %}Novo Orçamento{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-field {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-field:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-field.error {
+        border-color: #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">
+                {% if orcamento %}Editar Orçamento{% else %}Novo Orçamento{% endif %}
+            </h1>
+            <a href="{% url 'orcamento:lista_orcamentos' %}" class="text-blue-600 hover:underline">
+                ← Voltar para Lista
+            </a>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Local</label>
+                    {{ form.nome_local }}
+                    {% if form.nome_local.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.nome_local.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+                    {{ form.nome_usuarios }}
+                    {% if form.nome_usuarios.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.nome_usuarios.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Acionamento</label>
+                    {{ form.data_acionamento }}
+                    {% if form.data_acionamento.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.data_acionamento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Chegada</label>
+                    {{ form.data_chegada }}
+                    {% if form.data_chegada.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.data_chegada.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">SLA Resposta</label>
+                    {{ form.sla_resposta }}
+                    {% if form.sla_resposta.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.sla_resposta.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'orcamento:lista_orcamentos' %}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    {% if orcamento %}Atualizar{% else %}Salvar{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Aplicar classes CSS aos campos do formulário
+    document.addEventListener('DOMContentLoaded', function() {
+        const formFields = document.querySelectorAll('input, select, textarea');
+        formFields.forEach(field => {
+            field.classList.add('form-field');
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,36 @@
+{% if itens %}
+    <div class="space-y-3 p-4">
+        {% for item in itens %}
+            <div class="estoque-list-item bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                 onclick="carregarEstoque({{ item.id }})">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="col-span-1">
+                        <div class="text-sm font-medium text-gray-500">Nº Registro</div>
+                        <div class="text-sm text-gray-900">{{ item.id }}</div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="text-sm font-medium text-gray-500">Local</div>
+                        <div class="text-sm text-gray-900">{{ item.local }}</div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="text-sm font-medium text-gray-500">Usuário</div>
+                        <div class="text-sm text-gray-900">{{ item.usuario }}</div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="text-sm font-medium text-gray-500">Data/Hora</div>
+                        <div class="text-sm text-gray-900">{{ item.data_hora|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="text-sm font-medium text-gray-500">Status</div>
+                        <div class="text-sm status-{{ item.status }}">{{ item.get_status_display }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="p-6 text-center text-gray-500">
+        <div class="text-lg font-medium mb-2">Nenhum item encontrado</div>
+        <div class="text-sm">Tente ajustar os filtros de pesquisa</div>
+    </div>
+{% endif %} 
