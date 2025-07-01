@@ -30,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-z6$jg5p%!q36tj=x)8#04
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
+    '18.232.148.219',
     'localhost',
     '10.0.0.154',
 ]
