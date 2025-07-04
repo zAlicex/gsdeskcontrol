@@ -1,0 +1,10 @@
+# Ignorar logs
+django.log
+logs/
+
+# Ignorar arquivos compilados do Python
+__pycache__/
+*.pyc
+
+# Ignorar banco de dados SQLite (opcional)
+db.sqlite3 
