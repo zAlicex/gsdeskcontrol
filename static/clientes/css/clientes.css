@@ -481,3 +481,124 @@ body {
 .cliente-item.selected:hover {
     background-color: #fde047 !important;
 } 
+
+/* Ajuste para igualar ao RAT */
+#formTitle {
+    font-size: 1.125rem;
+    font-weight: bold;
+    color: #b91c1c;
+    margin-bottom: 1rem;
+}
+#cancelEdit {
+    background-color: #facc15;
+    color: #b91c1c;
+    border: none;
+    padding: 0.375rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+    display: none;
+}
+#cancelEdit:hover {
+    background-color: #fde047;
+    color: #b91c1c;
+}
+#submitBtn {
+    background-color: #b91c1c;
+    color: #fff;
+    border: none;
+    padding: 0.375rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+}
+#submitBtn:hover {
+    background-color: #dc2626;
+}
+#clientes-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.cliente-item {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #facc15;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.cliente-item:hover, .cliente-item.selected {
+    background-color: #fde047 !important;
+    color: #b91c1c;
+}
+.compact-form {
+    padding: 1rem;
+} 
+
+.card-local {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+}
+.local-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: .75rem;
+}
+.local-nome {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.local-actions button {
+  margin-left: .5rem;
+}
+.produtos-lista {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: .75rem;
+}
+.produto-pill {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: .5rem 1rem;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+.badge {
+  background: #c8102e;
+  color: #fff;
+  border-radius: 50%;
+  padding: .25rem .7rem;
+  margin-left: .5rem;
+  font-size: .95em;
+  font-weight: bold;
+}
+.local-footer {
+  font-size: .95em;
+  color: #b91c1c;
+  border-top: 1px solid #eee;
+  padding-top: .5rem;
+}
+.btn-editar, .btn-excluir {
+  background: #fff;
+  border: 1px solid #c8102e;
+  color: #c8102e;
+  border-radius: 6px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+}
+.btn-editar:hover, .btn-excluir:hover {
+  background: #c8102e;
+  color: #fff;
+} 

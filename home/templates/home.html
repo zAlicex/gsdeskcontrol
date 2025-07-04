@@ -64,6 +64,55 @@
         </div>
     </div>
 
+    <!-- Seção de Funcionalidades do Sistema -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8">
+        <a href="{% url 'home:index' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-home text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">HOME</span>
+        </a>
+        <a href="{% url 'clientes:clientes' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-users text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">LOCAIS</span>
+        </a>
+        <a href="{% url 'orcamento:lista_orcamentos' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-calculator text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">ACIONAMENTOS</span>
+            <span class="text-xs text-gray-600 text-center mt-1">Controlar Acionamentos: Acompanhe solicitações e status de atendimento.</span>
+        </a>
+        <a href="{% url 'rat:rat' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-file-alt text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">USUARIOS</span>
+        </a>
+        <a href="{% url 'orpecas:orpecas' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-cogs text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">SENSORES</span>
+        </a>
+        <a href="{% url 'estoque:estoque' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-box-open text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">PLANO CONJUNTURAL</span>
+        </a>
+        <a href="{% url 'estoque:produto_list' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-cube text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">PRODUTOS</span>
+        </a>
+        <a href="{% url 'treinamentos:treinamentos' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-graduation-cap text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">TREINAMENTOS</span>
+        </a>
+        <a href="{% url 'pagpendentes:pagpendentes' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-money-bill-wave text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">HANDOVER DE ALARMES</span>
+        </a>
+        <a href="{% url 'rondas:rondas' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-shield-alt text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">RONDAS</span>
+        </a>
+        <a href="{% url 'ocorrencias:ocorrencias' %}" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-yellow-50 transition">
+            <i class="fas fa-exclamation-triangle text-3xl text-red-800 mb-2"></i>
+            <span class="font-bold text-red-800">OCORRÊNCIAS</span>
+        </a>
+    </div>
+
     <!-- Seção Central com Gráficos -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Gráfico de Faturamento -->

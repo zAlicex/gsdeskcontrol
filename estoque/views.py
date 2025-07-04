@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from .models import Estoque
-from .forms import EstoqueForm
+from .models import Estoque, Produto
+from .forms import EstoqueForm, ProdutoForm
 from django.db.models import Q
 import json
 
@@ -141,3 +141,17 @@ def atualizar_estoque(request, estoque_id):
             })
     
     return redirect('estoque:estoque')
+
+def produto_list(request):
+    produtos = Produto.objects.all()
+    return render(request, 'estoque/produto_list.html', {'produtos': produtos})
+
+def produto_create(request):
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('estoque:produto_list')
+    else:
+        form = ProdutoForm()
+    return render(request, 'estoque/produto_form.html', {'form': form})

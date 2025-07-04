@@ -10,53 +10,83 @@
 {% endblock %}
 
 {% block content %}
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <!-- Main Layout -->
     <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Left Column - Form (60%) -->
-        <div id="form-column" class="lg:w-3/5 space-y-6">
+        <!-- Left Column - Form (40%) -->
+        <div id="form-column" class="lg:w-2/5 space-y-6">
             <!-- Client Form -->
             <div class="bg-white rounded-lg shadow-lg p-6 compact-form">
-                <form method="post" action="{% url 'clientes:clientes' %}" class="clientes-form" id="clienteForm" data-validate>
+                <form method="post" action="{% url 'clientes:clientes' %}" id="clienteForm" class="clientes-form">
                     {% csrf_token %}
-                    <input type="hidden" name="id" id="cliente_id" value="">
-                    
+                    <input type="hidden" name="id" id="cliente_id" value="{{ cliente_id }}">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-gray-800" id="formTitle">Novo Local</h3>
                         <div class="flex gap-2">
-                            <a href="{% url 'clientes:clientes' %}" id="cancelEdit" class="btn-secondary text-sm" style="display: none;">Voltar</a>
+                            <button type="button" id="cancelEdit" class="btn-secondary text-sm" style="display: none;">Voltar</button>
                         </div>
                     </div>
-
-                    <!-- Nome do Cliente -->
-                    <div class="grid grid-cols-1 gap-6 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                            <input type="text" name="nome" id="nome" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500" required>
-                        </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="nome" id="nome" class="form-control" required>
                     </div>
-                      
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Produtos e Quantidades</label>
+                        <div id="produtos-container">
+                            <div class="produto-row flex gap-2 mb-2 items-center">
+                                <select name="produtos" class="produto-select form-control" required>
+                                    <option value="">Selecione...</option>
+                                    {% for produto in produtos %}
+                                        <option value="{{ produto.pk }}">{{ produto.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="number" name="quantidades" class="quantidade-input form-control" min="1" value="1" required style="width:80px;">
+                                <button type="button" class="remover-produto btn-secondary" style="display:none;">Remover</button>
+                            </div>
+                        </div>
+                        <button type="button" id="adicionar-produto" class="btn-secondary mt-2">Adicionar Produto</button>
+                    </div>
                     <div class="flex justify-end mt-6">
                         <button type="submit" class="btn-primary" id="submitBtn">Salvar</button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <!-- Right Column - Client List and Search (40%) -->
-        <div id="list-column" class="lg:w-2/5 space-y-6">
-            <!-- Search Section -->
-           
-
-            <!-- Client List -->
+        <!-- Right Column - Client List and Search (60%) -->
+        <div id="list-column" class="lg:w-3/5 space-y-6">
             <div id="client-list-container" 
                  data-get-url-template="{% url 'clientes:get_cliente' 0 %}"
-                 data-update-url-template="{% url 'clientes:atualizar_cliente' 0 %}"
                  class="bg-white rounded-lg shadow-lg compact-form overflow-hidden">
                 <div class="p-6 border-b bg-slate-200">
                     <h2 class="text-xl font-bold text-gray-800">Listagem de Locais</h2>
                 </div>
                 <div id="client-list-results" class="max-h-96 overflow-y-auto">
-                    {% include 'clientes/partials/lista_clientes.html' %}
+                    {% for cliente in clientes %}
+                    <div class="card-local mb-4 cliente-item" data-cliente-id="{{ cliente.id }}" style="cursor:pointer;">
+                        <div class="local-header flex justify-between items-center mb-2">
+                            <span class="local-nome font-bold text-lg">{{ cliente.nome }}</span>
+                        </div>
+                        <div class="produtos-lista flex gap-4 flex-wrap mb-2">
+                            {% for rel in cliente.produtos_relacionados.all %}
+                            <div class="produto-pill flex items-center bg-gray-100 rounded-lg px-4 py-2 font-medium">
+                                {{ rel.produto }}
+                                <span class="badge ml-2 bg-red-700 text-white rounded-full px-2 py-1 text-xs font-bold">{{ rel.quantidade }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="local-footer text-sm text-red-700 border-t pt-2">
+                            <span>Total de produtos: {{ cliente.total_produtos }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -66,4 +96,23 @@
 {% block extra_js %}
     {{ block.super }}
     <script src="{% static 'clientes/js/clientes.js' %}?v={% now "U" %}"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.cliente-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const clienteId = this.getAttribute('data-cliente-id');
+            fetch(`/clientes/get_cliente/${clienteId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('cliente_id').value = data.cliente.id;
+                        document.getElementById('id_nome').value = data.cliente.nome;
+                        document.getElementById('id_produto').value = data.cliente.produto;
+                        document.getElementById('id_quantidade').value = data.cliente.quantidade;
+                    }
+                });
+        });
+    });
+});
+</script>
 {% endblock %} 

@@ -17,3 +17,9 @@ class Estoque(models.Model):
 
     def __str__(self):
         return f"{self.local} - {self.usuario} - {self.data_hora:%d/%m/%Y %H:%M} - {self.get_status_display()}"
+
+class Produto(models.Model):
+    nome = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.nome

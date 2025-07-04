@@ -32,9 +32,11 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = [
     '18.232.148.219',
     'localhost',
+    '127.0.0.1',
     '10.0.0.154',
     'gsdeskcontrol.com.br',
 ]
+
 
 # Security settings
 if ENVIRONMENT == 'production':
@@ -157,12 +159,15 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# Remova ou comente o STATIC_ROOT
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+# Adicione esta linha se ainda não tiver
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 
 # Media files

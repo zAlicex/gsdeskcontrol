@@ -6,59 +6,63 @@ from django.http import JsonResponse
 from .models import Clientes
 from .forms import ClientesForm
 import json
+from estoque.models import Produto
+from django.template.loader import render_to_string
+from .models import Clientes, ClienteProduto
+
+from estoque.models import Produto
+
+def clientes_view(request):
+    ...
+    produtos = Produto.objects.all()
+    return render(request, 'clientes/clientes.html', {
+        'form': form,
+        'clientes': clientes,
+        'cliente_id': cliente_id or '',
+        'produtos': produtos,  # 👈 isso aqui!
+    })
+
 
 @login_required
 def clientes_view(request):
-    """
-    Renderiza a página de clientes e lida com a criação de novos clientes.
-    """
+    cliente_id = request.GET.get('id')
     if request.method == 'POST':
-        # Lidar com o salvamento de novos clientes
         cliente_id = request.POST.get('id')
-        
         if cliente_id:
-            # Atualizar cliente existente
             cliente = get_object_or_404(Clientes, id=cliente_id)
             form = ClientesForm(request.POST, instance=cliente)
-            action = 'atualizado'
         else:
-            # Criar novo cliente
             form = ClientesForm(request.POST)
-            action = 'criado'
-        
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Cliente {action} com sucesso!')
+            cliente = form.save()
+            # Processa múltiplos produtos
+            produtos = request.POST.getlist('produtos')
+            quantidades = request.POST.getlist('quantidades')
+            # Remove produtos antigos
+            cliente.produtos_relacionados.all().delete()
+            # Adiciona os novos
+            for prod_id, qtd in zip(produtos, quantidades):
+                if prod_id and qtd:
+                    ClienteProduto.objects.create(
+                        cliente=cliente,
+                        produto_id=prod_id,
+                        quantidade=qtd
+                    )
+            return redirect('clientes:clientes')
+    else:
+        if cliente_id:
+            cliente = get_object_or_404(Clientes, id=cliente_id)
+            form = ClientesForm(instance=cliente)
         else:
-            messages.error(request, 'Erro ao salvar cliente. Verifique os dados.')
-        
-        return redirect('clientes:clientes')
-    
-    # Busca
-    search_name = request.GET.get('search_name', '')
-    
-    # Query base
-    clientes = Clientes.objects.all().order_by('-id')
-    
-    # Aplicar filtros de busca
-    if search_name:
-        clientes = clientes.filter(
-            Q(nome__icontains=search_name) 
-        )
-    
-    # Se for uma requisição AJAX, retorna apenas a lista
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'clientes/partials/lista_clientes.html', {
-            'clientes': clientes
-        })
-    
-    context = {
+            form = ClientesForm()
+    clientes = Clientes.objects.all()
+    produtos = Produto.objects.all()
+    return render(request, 'clientes/clientes.html', {
+        'form': form,
         'clientes': clientes,
-        'search_name': search_name,
-        'active_tab': 'clientes',
-    }
-    
-    return render(request, 'clientes/clientes.html', context)
+        'cliente_id': cliente_id or '',
+        'produtos': produtos,
+    })
 
 @login_required
 def carregar_mais_clientes(request):
@@ -114,35 +118,22 @@ def salvar_cliente(request):
 
 @login_required
 def get_cliente(request, cliente_id):
-    """
-    Retorna os dados de um cliente específico em formato JSON para o formulário.
-    """
-    try:
-        cliente = get_object_or_404(Clientes, id=cliente_id)
-        data = {
-            'id': cliente.id,
-            'nome': cliente.nome or '',
+    cliente = get_object_or_404(Clientes, id=cliente_id)
+    produtos = [
+        {
+            'produto': rel.produto.nome,
+            'produto_id': rel.produto.id,
+            'quantidade': rel.quantidade
         }
-        return JsonResponse({'success': True, 'cliente': data})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        for rel in cliente.produtos_relacionados.all()
+    ]
+    data = {
+        'id': cliente.id,
+        'nome': cliente.nome,
+        'produtos': produtos,
+    }
+    return JsonResponse({'success': True, 'cliente': data})
 
-@login_required
-def atualizar_cliente(request, cliente_id):
-    """
-    Atualiza um cliente existente a partir de dados POST.
-    """
-    if request.method == 'POST':
-        cliente = get_object_or_404(Clientes, id=cliente_id)
-        form = ClientesForm(request.POST, instance=cliente)
-        
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Cliente atualizado com sucesso!')
-        else:
-            messages.error(request, 'Erro ao atualizar cliente.')
-    
-    return redirect('clientes:clientes')
 
 @login_required
 def locais_api(request):
@@ -151,3 +142,9 @@ def locais_api(request):
     """
     locais = Clientes.objects.all().values('id', 'nome')
     return JsonResponse(list(locais), safe=False)
+
+def lista_clientes_partial(request):
+    from .models import Clientes
+    clientes = Clientes.objects.all()
+    html = render_to_string('clientes/partials/lista_clientes.html', {'clientes': clientes})
+    return JsonResponse({'html': html})

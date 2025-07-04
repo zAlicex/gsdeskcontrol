@@ -1,16 +1,10 @@
-{% for cliente in clientes %}
-<div class="cliente-item px-6 py-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors" 
-     data-cliente-id="{{ cliente.pk }}"
-     onclick="carregarCliente('{{ cliente.pk }}');">
-    <div class="text-sm">
-        <div class="font-medium text-gray-900">{{ cliente.nome|default:"-" }}</div>
-    </div>
-</div>
-{% empty %}
-<div class="px-6 py-4 text-gray-500 text-center">Nenhum cliente encontrado</div>
-{% endfor %}
-
-<!-- Indicador de carregamento para scroll infinito -->
-<div id="loading-indicator" class="px-6 py-4 text-center text-gray-500" style="display: none;">
-    <i class="fas fa-spinner fa-spin mr-2"></i>Carregando mais clientes...
-</div> 
+<ul id="clientes-lista">
+    {% for cliente in clientes %}
+        <li class="cliente-item" data-cliente-id="{{ cliente.id }}" style="cursor:pointer;">
+            {{ cliente.nome }} - 
+            {% for rel in cliente.produtos_relacionados.all %}
+                {{ rel.produto }} - {{ rel.quantidade }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </li>
+    {% endfor %}
+</ul>
