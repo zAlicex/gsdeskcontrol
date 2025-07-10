@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.apps import apps
+from django.http import JsonResponse
 
 # Create your models here.
 

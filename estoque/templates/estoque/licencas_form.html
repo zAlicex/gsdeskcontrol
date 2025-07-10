@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nova Licença{% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mx-auto py-10 flex justify-center items-center min-h-[60vh]">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-blue-200 p-8 animate-fade-in">
+        <div class="flex flex-col items-center mb-6">
+            <span class="inline-block mb-2">
+                <i class="fas fa-key text-4xl text-blue-800 drop-shadow"></i>
+            </span>
+            <h2 class="text-2xl font-extrabold text-blue-800 mb-2">Nova Licença</h2>
+            <p class="text-gray-500 text-sm">Registre uma nova licença para um produto.</p>
+        </div>
+        
+        <!-- Informações do Produto Selecionado -->
+        {% if form.produto.value %}
+        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 class="font-semibold text-blue-800 mb-2">Produto Selecionado:</h4>
+            <div class="space-y-1 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Nome:</span>
+                    <span class="font-semibold">{{ form.produto.value.nome }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Quantidade Disponível:</span>
+                    <span class="font-semibold {% if form.produto.value.quantidade and form.produto.value.quantidade > 0 %}text-green-600{% elif form.produto.value.quantidade == 0 %}text-red-600{% else %}text-gray-400{% endif %}">
+                        {% if form.produto.value.quantidade is not None %}
+                            {{ form.produto.value.quantidade }}
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Licenças Existentes:</span>
+                    <span class="font-semibold text-blue-600">{{ form.produto.value.licencas.count }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Produto</label>
+                {{ form.produto }}
+                {% if form.produto.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.produto.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Quantidade de Licenças</label>
+                {{ form.quantidade }}
+                <p class="text-xs text-gray-500 mt-1">Quantidade de licenças a serem registradas</p>
+                {% if form.quantidade.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.quantidade.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Valor da Licença</label>
+                {{ form.valor }}
+                <p class="text-xs text-gray-500 mt-1">Valor em reais (R$)</p>
+                {% if form.valor.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.valor.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Aviso sobre subtração automática -->
+            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-semibold">Atenção:</p>
+                        <p>A quantidade de licenças será automaticamente subtraída da quantidade disponível do produto.</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if form.errors %}
+            <div class="bg-red-100 text-red-700 rounded p-2 text-sm">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-green-100 text-green-700 rounded p-2 text-sm mb-2">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <div class="flex gap-3">
+                <a href="{% url 'estoque:produto_list' %}" class="btn-secondary flex-1 py-2 text-lg text-center">Cancelar</a>
+                <button type="submit" class="btn-primary flex-1 py-2 text-lg">Salvar Licença</button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+@keyframes fade-in { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+.animate-fade-in { animation: fade-in 0.7s ease; }
+.input-bordered { border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.5rem 1rem; }
+</style>
+{% endblock %} 

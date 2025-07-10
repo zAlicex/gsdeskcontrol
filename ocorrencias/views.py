@@ -39,7 +39,7 @@ class OcorrenciasView(View):
         return render(request, 'ocorrencias/ocorrencias.html', context)
 
     def post(self, request):
-        form = OcorrenciaForm(request.POST)
+        form = OcorrenciaForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('ocorrencias:ocorrencias')
@@ -64,6 +64,8 @@ def get_ocorrencia(request, ocorrencia_id):
                 'data_hora': ocorrencia.data_hora.strftime('%Y-%m-%dT%H:%M') if ocorrencia.data_hora else '',
                 'status': ocorrencia.status,
                 'observacoes': ocorrencia.observacoes,
+                'imagem_url': ocorrencia.imagem.url if ocorrencia.imagem else None,
+                'imagem_nome': ocorrencia.imagem.name if ocorrencia.imagem else None,
             }
         }
         return JsonResponse(ocorrencia_data)
@@ -73,7 +75,7 @@ def get_ocorrencia(request, ocorrencia_id):
 def atualizar_ocorrencia(request, ocorrencia_id):
     ocorrencia = get_object_or_404(Ocorrencia, id=ocorrencia_id)
     if request.method == 'POST':
-        form = OcorrenciaForm(request.POST, instance=ocorrencia)
+        form = OcorrenciaForm(request.POST, request.FILES, instance=ocorrencia)
         if form.is_valid():
             form.save()
             return redirect('ocorrencias:ocorrencias')
@@ -85,3 +87,29 @@ def excluir_ocorrencia(request, ocorrencia_id):
         ocorrencia.delete()
         return redirect('ocorrencias:ocorrencias')
     return redirect('ocorrencias:ocorrencias')
+
+def ocorrencias_json(request):
+    """Endpoint JSON para listar todas as ocorrências"""
+    ocorrencias = Ocorrencia.objects.all().select_related('local')
+    
+    ocorrencias_data = []
+    for ocorrencia in ocorrencias:
+        ocorrencia_data = {
+            'id': ocorrencia.id,
+            'local': {
+                'id': ocorrencia.local.id if ocorrencia.local else None,
+                'nome': ocorrencia.local.nome if ocorrencia.local else '',
+            },
+            'data_hora': ocorrencia.data_hora.strftime('%Y-%m-%d %H:%M:%S') if ocorrencia.data_hora else None,
+            'status': ocorrencia.status,
+            'status_display': ocorrencia.get_status_display(),
+            'observacoes': ocorrencia.observacoes,
+            'imagem_url': ocorrencia.imagem.url if ocorrencia.imagem else None,
+            'imagem_nome': ocorrencia.imagem.name if ocorrencia.imagem else None,
+        }
+        ocorrencias_data.append(ocorrencia_data)
+    
+    return JsonResponse({
+        'ocorrencias': ocorrencias_data,
+        'total_ocorrencias': len(ocorrencias_data)
+    })

@@ -12,6 +12,7 @@ class Ocorrencia(models.Model):
     data_hora = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='portas_abertas')
     observacoes = models.TextField(blank=True)
+    imagem = models.ImageField(upload_to='ocorrencias/', null=True, blank=True, verbose_name="Imagem")
 
     def __str__(self):
         return f"{self.local} - {self.data_hora:%d/%m/%Y %H:%M} - {self.get_status_display()}"

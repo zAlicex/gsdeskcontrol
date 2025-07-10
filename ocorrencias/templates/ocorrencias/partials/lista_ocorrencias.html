@@ -1,26 +1,46 @@
 <div class="divide-y divide-gray-200">
     {% for ocorrencia in ocorrencias %}
-        <div class="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer" onclick="carregarOcorrencia('{{ ocorrencia.id }}')">
-            <div>
-                <p class="font-semibold text-gray-800">
-                    {{ ocorrencia.local.nome }}
-                    <span class="text-gray-500 text-xs">({{ ocorrencia.data_hora|date:"d/m/Y H:i" }})</span>
-                </p>
-                <p class="text-sm text-gray-600">
-                    Status: 
-                    {% if ocorrencia.status == 'portas_abertas' %}
-                        Portas e Portões Abertos
-                    {% elif ocorrencia.status == 'inibicao_cameras' %}
-                        Inibição de Câmeras e Sensores
-                    {% elif ocorrencia.status == 'botao_panico' %}
-                        Acionamento indevido de Botão de Pânico
-                    {% endif %}
-                </p>
-                {% if ocorrencia.observacoes %}
-                    <p class="text-sm text-gray-500">{{ ocorrencia.observacoes|truncatechars:50 }}</p>
+        <div class="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer ocorrencia-item" onclick="carregarOcorrencia('{{ ocorrencia.id }}')">
+            <div class="flex items-center space-x-3 flex-1">
+                <!-- Imagem da ocorrência -->
+                {% if ocorrencia.imagem %}
+                    <div class="flex-shrink-0">
+                        <img src="{{ ocorrencia.imagem.url }}" 
+                             alt="Imagem da ocorrência" 
+                             class="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                             onclick="event.stopPropagation(); abrirModalImagem('{{ ocorrencia.imagem.url }}')"
+                             title="Clique para ampliar">
+                    </div>
+                {% else %}
+                    <div class="flex-shrink-0 w-12 h-12 bg-gray-200 rounded border flex items-center justify-center">
+                        <span class="text-gray-400 text-xs">Sem img</span>
+                    </div>
                 {% endif %}
+                
+                <!-- Informações da ocorrência -->
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-800">
+                        {{ ocorrencia.local.nome }}
+                        <span class="text-gray-500 text-xs">({{ ocorrencia.data_hora|date:"d/m/Y H:i" }})</span>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Status: 
+                        {% if ocorrencia.status == 'portas_abertas' %}
+                            Portas e Portões Abertos
+                        {% elif ocorrencia.status == 'inibicao_cameras' %}
+                            Inibição de Câmeras e Sensores
+                        {% elif ocorrencia.status == 'botao_panico' %}
+                            Acionamento indevido de Botão de Pânico
+                        {% endif %}
+                    </p>
+                    {% if ocorrencia.observacoes %}
+                        <p class="text-sm text-gray-500">{{ ocorrencia.observacoes|truncatechars:50 }}</p>
+                    {% endif %}
+                </div>
             </div>
-            <div class="text-right">
+            
+            <!-- Botão excluir -->
+            <div class="text-right flex-shrink-0">
                 <form action="{% url 'ocorrencias:excluir_ocorrencia' ocorrencia.id %}" method="post" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta ocorrência?');">
                     {% csrf_token %}
                     <button type="submit" class="text-red-600 hover:text-red-800 text-sm">Excluir</button>

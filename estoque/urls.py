@@ -12,4 +12,13 @@ urlpatterns = [
     path('atualizar/<int:estoque_id>/', views.atualizar_estoque, name='atualizar_estoque'),
     path('produtos/', views.produto_list, name='produto_list'),
     path('produtos/novo/', views.produto_create, name='produto_create'),
+    path('licencas/', views.licencas_list, name='licencas_list'),
+    path('licencas/novo/', views.licencas_create, name='licencas_create'),
+    path('licencas/resumo/', views.licencas_resumo, name='licencas_resumo'),
+    
+    # Endpoints JSON
+    path('conjunt_json/', views.conjunt_json, name='conjunt_json'),
+    path('produtos_json/', views.produtos_json, name='produtos_json'),
+    path('licencas_json/', views.licencas_json, name='licencas_json'),
+    path('all_models_json/', views.all_models_json, name='all_models_json'),
 ] 

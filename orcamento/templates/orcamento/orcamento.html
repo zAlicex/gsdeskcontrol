@@ -3,12 +3,54 @@
 
 {% block title %}Acionamentos{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Estilos do modal */
+    #imagem-modal {
+        backdrop-filter: blur(5px);
+    }
+    
+    #modal-imagem {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        max-width: 90vw;
+        max-height: 85vh;
+        object-fit: contain;
+    }
+    
+    #fechar-modal {
+        transition: all 0.2s ease;
+    }
+    
+    #fechar-modal:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Estilos da imagem na listagem */
+    .orcamento-item img {
+        transition: all 0.2s ease;
+    }
+    
+    .orcamento-item img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Modal responsivo */
+    @media (max-width: 768px) {
+        #modal-imagem {
+            max-width: 95vw;
+            max-height: 80vh;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6">
     <!-- Formulário à esquerda -->
     <div class="lg:w-3/5">
         <div class="bg-slate-200 rounded-lg shadow-lg p-6 mb-6">
-            <form method="post" action="{% url 'orcamento:lista_orcamentos' %}" class="orcamento-form" id="orcamentoForm">
+            <form method="post" action="{% url 'orcamento:lista_orcamentos' %}" enctype="multipart/form-data" class="orcamento-form" id="orcamentoForm">
                 {% csrf_token %}
                 <input type="hidden" name="orcamento_id" id="orcamento_id" value="">
                 
@@ -71,6 +113,13 @@
                         {% endif %}
                     </div>
                 </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagem</label>
+                    <input type="file" name="imagem" id="id_imagem" accept="image/*" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                    {% if form.imagem.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.imagem.errors.0 }}</p>
+                    {% endif %}
+                </div>
                 <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" id="btn-novo" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Novo</button>
                     <button type="submit" id="btn-salvar" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar</button>
@@ -114,6 +163,15 @@
                                     <span class="font-medium">SLA:</span> {{ orcamento.sla_resposta }} horas
                                 </div>
                                 {% endif %}
+                                {% if orcamento.imagem %}
+                                <div class="mt-2">
+                                    <img src="{{ orcamento.imagem.url }}" 
+                                         alt="Imagem do acionamento" 
+                                         class="w-16 h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity" 
+                                         onclick="event.stopPropagation(); if(typeof abrirModalImagem === 'function') abrirModalImagem('{{ orcamento.imagem.url }}')"
+                                         title="Clique para ampliar">
+                                </div>
+                                {% endif %}
                             </div>
                             <div class="ml-4">
                                 <i class="fas fa-edit text-blue-500 text-lg"></i>
@@ -128,6 +186,19 @@
                     {% endfor %}
                 </ul>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para exibir imagem -->
+<div id="imagem-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg p-6 max-w-7xl w-full max-h-full overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">Visualizar Imagem</h3>
+            <button id="fechar-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <div class="flex justify-center">
+            <img id="modal-imagem" src="" alt="Imagem do acionamento" class="max-w-full max-h-[80vh] object-contain">
         </div>
     </div>
 </div>
@@ -154,4 +225,55 @@
 
 {% block extra_js %}
 <script src="{% static 'orcamento/js/orcamento.js' %}?v={% now "U" %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado, inicializando modal...');
+    // Modal para exibir imagem
+    const modal = document.getElementById('imagem-modal');
+    const modalImagem = document.getElementById('modal-imagem');
+    const fecharModal = document.getElementById('fechar-modal');
+    
+    console.log('Elementos do modal:', { modal: !!modal, modalImagem: !!modalImagem, fecharModal: !!fecharModal });
+
+    // Função para abrir modal
+    window.abrirModalImagem = function(src) {
+        console.log('Abrindo modal com imagem:', src);
+        if (modalImagem && modal) {
+            modalImagem.src = src;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Previne scroll da página
+            console.log('Modal aberto com sucesso');
+        } else {
+            console.error('Elementos do modal não encontrados:', { modalImagem: !!modalImagem, modal: !!modal });
+        }
+    };
+
+    // Função para fechar modal
+    function fecharModalImagem() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto'; // Restaura scroll da página
+    }
+
+    // Event listeners
+    if (fecharModal) {
+        fecharModal.addEventListener('click', fecharModalImagem);
+    }
+
+    // Fechar modal ao clicar fora da imagem
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                fecharModalImagem();
+            }
+        });
+    }
+
+    // Fechar modal com tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            fecharModalImagem();
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -173,18 +173,18 @@
                 <a href="{% url 'orpecas:orpecas' %}" class="tab-item flex-shrink-0 {% if active_tab == 'orpecas' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-cogs mr-2"></i>SENSORES
                 </a>
-                <a href="{% url 'estoque:estoque' %}" class="tab-item flex-shrink-0 {% if active_tab == 'estoque' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
+               <!--- <a href="{% url 'estoque:estoque' %}" class="tab-item flex-shrink-0 {% if active_tab == 'estoque' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-box-open mr-2"></i>PLANO CONJUNTURAL
-                </a>
-                <a href="{% url 'estoque:produto_list' %}" class="tab-item flex-shrink-0 {% if active_tab == 'produtos' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
+                </a>--->
+                <a href="{% url 'estoque:licencas_resumo' %}" class="tab-item flex-shrink-0 {% if active_tab == 'produtos' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-cube mr-2"></i>PRODUTOS
                 </a>
                 <a href="{% url 'treinamentos:treinamentos' %}" class="tab-item flex-shrink-0 {% if active_tab == 'treinamentos' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-graduation-cap mr-2"></i>TREINAMENTOS
-                </a>
+                </a><!---
                 <a href="{% url 'pagpendentes:pagpendentes' %}" class="tab-item flex-shrink-0 {% if active_tab == 'pagpendentes' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-money-bill-wave mr-2"></i>HANDOVER DE ALARMES
-                </a>
+                </a>-->
             
                 <a href="{% url 'rondas:rondas' %}" class="tab-item flex-shrink-0 {% if active_tab == 'rondas' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-shield-alt mr-2"></i>RONDAS

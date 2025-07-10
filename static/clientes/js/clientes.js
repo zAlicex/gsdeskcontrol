@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelEdit');
     const listContainer = document.getElementById('client-list-container');
     const nomeInput = document.getElementById('nome');
+    const prontaRespostaInput = document.getElementById('pronta_resposta');
+    const telefoneInput = document.getElementById('telefone');
     const quantidadeInput = document.getElementById('quantidade');
     const produtoSelect = document.getElementById('id_produto') || document.getElementById('produto');
 
@@ -65,6 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const cliente = data.cliente;
                     clienteIdField.value = cliente.id;
                     nomeInput.value = cliente.nome || '';
+                    prontaRespostaInput.value = cliente.pronta_resposta || '';
+                    telefoneInput.value = cliente.telefone || '';
 
                     // Limpa todas as linhas de produtos, exceto a primeira
                     const produtosContainer = document.getElementById('produtos-container');
