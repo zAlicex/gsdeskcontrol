@@ -29,6 +29,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-z6$jg5p%!q36tj=x)8#04
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+
 ALLOWED_HOSTS = [
     '18.232.148.219',
     'localhost',
@@ -36,6 +37,9 @@ ALLOWED_HOSTS = [
     '10.0.0.154',
     'gsdeskcontrol.com.br',
 ]
+
+ALLOWED_HOSTS = ['3.92.250.120', 'gsdeskcontrol.com.br', 'www.gsdeskcontrol.com.br']
+
 
 
 # Security settings
