@@ -21,4 +21,15 @@ urlpatterns = [
     path('produtos_json/', views.produtos_json, name='produtos_json'),
     path('licencas_json/', views.licencas_json, name='licencas_json'),
     path('all_models_json/', views.all_models_json, name='all_models_json'),
-] 
+    
+    # Endpoints JSON separados por módulo
+    path('clientes_json/', views.clientes_json, name='clientes_json'),
+    path('orcamentos_json/', views.orcamentos_json, name='orcamentos_json'),
+    path('orpecas_json/', views.orpecas_json, name='orpecas_json'),
+    path('ocorrencias_json/', views.ocorrencias_json, name='ocorrencias_json'),
+    path('rat_json/', views.rat_json, name='rat_json'),
+    path('agenda_json/', views.agenda_json, name='agenda_json'),
+    path('pagpendentes_json/', views.pagpendentes_json, name='pagpendentes_json'),
+    path('treinamentos_json/', views.treinamentos_json, name='treinamentos_json'),
+    path('rondas_json/', views.rondas_json, name='rondas_json'),
+]
