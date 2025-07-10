@@ -369,10 +369,9 @@ def clientes_json(request):
 
 def orcamentos_json(request):
     """Endpoint JSON que retorna todas as informações dos orçamentos."""
-    from orcamento.models import Orcamento, ItemOrcamento
+    from orcamento.models import Orcamento
     
     orcamentos = Orcamento.objects.all().select_related('nome_local', 'nome_usuarios')
-    itens_orcamento = ItemOrcamento.objects.all().select_related('orcamento')
     
     orcamentos_data = []
     for orcamento in orcamentos:
@@ -389,32 +388,17 @@ def orcamentos_json(request):
         }
         orcamentos_data.append(orcamento_data)
     
-    itens_data = []
-    for item in itens_orcamento:
-        item_data = {
-            'id': item.id,
-            'orcamento_id': item.orcamento.id,
-            'descricao': item.descricao,
-            'quantidade': item.quantidade,
-            'valor_unitario': float(item.valor_unitario) if item.valor_unitario else 0,
-            'valor_total': float(item.valor_total) if item.valor_total else 0,
-        }
-        itens_data.append(item_data)
-    
     return JsonResponse({
         'success': True,
         'total_orcamentos': len(orcamentos_data),
-        'total_itens_orcamento': len(itens_data),
         'orcamentos': orcamentos_data,
-        'itens_orcamento': itens_data,
     }, safe=False)
 
 def orpecas_json(request):
     """Endpoint JSON que retorna todas as informações dos orçamentos de peças."""
-    from orpecas.models import Orpecas, ItemOrpecas
+    from orpecas.models import Orpecas
     
     orpecas = Orpecas.objects.all().select_related('local')
-    itens_orpecas = ItemOrpecas.objects.all().select_related('orpecas')
     
     orpecas_data = []
     for orpeca in orpecas:
@@ -429,24 +413,10 @@ def orpecas_json(request):
         }
         orpecas_data.append(orpeca_data)
     
-    itens_data = []
-    for item in itens_orpecas:
-        item_data = {
-            'id': item.id,
-            'orpecas_id': item.orpecas.id,
-            'descricao': item.descricao,
-            'quantidade': item.quantidade,
-            'valor_unitario': float(item.valor_unitario) if item.valor_unitario else 0,
-            'valor_total': float(item.valor_total) if item.valor_total else 0,
-        }
-        itens_data.append(item_data)
-    
     return JsonResponse({
         'success': True,
         'total_orpecas': len(orpecas_data),
-        'total_itens_orpecas': len(itens_data),
         'orpecas': orpecas_data,
-        'itens_orpecas': itens_data,
     }, safe=False)
 
 def ocorrencias_json(request):
@@ -506,7 +476,7 @@ def agenda_json(request):
     from agenda.models import AgendaDia, Visita
     
     agenda_dias = AgendaDia.objects.all()
-    visitas = Visita.objects.all().select_related('agenda_dia')
+    visitas = Visita.objects.all().select_related('agenda')
     
     agenda_dias_data = []
     for dia in agenda_dias:
@@ -521,13 +491,13 @@ def agenda_json(request):
     for visita in visitas:
         visita_data = {
             'id': visita.id,
-            'agenda_dia_id': visita.agenda_dia.id if visita.agenda_dia else None,
-            'agenda_dia_data': visita.agenda_dia.data.strftime('%Y-%m-%d') if visita.agenda_dia else None,
-            'hora_inicio': visita.hora_inicio.strftime('%H:%M') if visita.hora_inicio else None,
-            'hora_fim': visita.hora_fim.strftime('%H:%M') if visita.hora_fim else None,
-            'descricao': visita.descricao,
-            'status': visita.status,
-            'status_display': visita.get_status_display(),
+            'agenda_id': visita.agenda.id if visita.agenda else None,
+            'agenda_data': visita.agenda.data.strftime('%Y-%m-%d') if visita.agenda else None,
+            'horario': visita.horario.strftime('%H:%M') if visita.horario else None,
+            'servico': visita.servico,
+            'cliente': visita.cliente,
+            'profissional': visita.profissional,
+            'observacoes': visita.observacoes,
         }
         visitas_data.append(visita_data)
     
