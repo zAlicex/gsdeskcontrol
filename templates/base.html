@@ -160,7 +160,7 @@
                     <i class="fas fa-home mr-2"></i>HOME
                 </a>
               
-                <a href="{% url 'clientes:clientes' %}" class="tab-item flex-shrink-0 {% if active_tab == 'clientes' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
+                <a href="{% url 'locais:locais' %}" class="tab-item flex-shrink-0 {% if active_tab == 'clientes' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-users mr-2"></i>LOCAIS
                 </a>
                 <a href="{% url 'orcamento:lista_orcamentos' %}" class="tab-item flex-shrink-0 {% if active_tab == 'orcamento' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
@@ -192,6 +192,9 @@
                 <a href="{% url 'ocorrencias:ocorrencias' %}" class="tab-item flex-shrink-0 {% if active_tab == 'ocorrencias' %}text-slate-700 border-b-2 border-slate-700{% else %}text-gray-500 hover:text-slate-700{% endif %}">
                     <i class="fas fa-exclamation-triangle mr-2"></i>OCORRÊNCIAS
                 </a>
+                <button type="button" onclick="abrirDashboardModal()" class="tab-item flex-shrink-0 text-gray-500 hover:text-slate-700">
+                    <i class="fas fa-chart-bar mr-2"></i>DASHBOARD
+                </button>
             </nav>
         </div>
     </div>
@@ -201,6 +204,21 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Modal Dashboard PowerBI -->
+    <div id="dashboard-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-4 relative w-[1915px] h-[1231px]">
+            <button onclick="fecharDashboardModal()" class="absolute top-2 right-2 text-gray-700 hover:text-red-600 text-xl font-bold">&times;</button>
+            <iframe title="Desktop Dashboard" width="1915" height="1231" src="https://app.powerbi.com/view?r=eyJrIjoiNDcxMzMxNzYtMjViNS00MTRjLTk3YWYtNTgzMzk5M2JlOTM1IiwidCI6IjA1ZTExMDdiLTYwZGUtNDdhOS1iNTU3LWIwMDYwN2I2YjI1OCJ9" frameborder="0" allowFullScreen="true" class="w-full h-full"></iframe>
+        </div>
+    </div>
+    <script>
+    function abrirDashboardModal() {
+        document.getElementById('dashboard-modal').classList.remove('hidden');
+    }
+    function fecharDashboardModal() {
+        document.getElementById('dashboard-modal').classList.add('hidden');
+    }
+    </script>
     <!-- Sistema de Validação -->
     <script src="{% static 'js/validation.js' %}"></script>
     {% block extra_js %}{% endblock %}

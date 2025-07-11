@@ -8,3 +8,4 @@ __pycache__/
 
 # Ignorar banco de dados SQLite (opcional)
 db.sqlite3 db.sqlite3
+db.sqlite3

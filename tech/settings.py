@@ -36,9 +36,12 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '10.0.0.154',
     'gsdeskcontrol.com.br',
+    '3.92.250.120',
+    'www.gsdeskcontrol.com.br',
 ]
 
 ALLOWED_HOSTS = ['3.92.250.120', 'gsdeskcontrol.com.br', 'www.gsdeskcontrol.com.br']
+
 
 
 

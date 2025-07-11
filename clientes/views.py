@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.http import JsonResponse
-from .models import Clientes
+from .models import Clientes, ClienteProntaResposta, ClienteTelefone
 from .forms import ClientesForm
 import json
 from estoque.models import Produto
 from django.template.loader import render_to_string
 from .models import Clientes, ClienteProduto
+from django.views.decorators.csrf import csrf_exempt
 
 from estoque.models import Produto
 
@@ -48,7 +49,34 @@ def clientes_view(request):
                         produto_id=prod_id,
                         quantidade=qtd
                     )
-            return redirect('clientes:clientes')
+            # --- NOVO: Processa prontas respostas e telefones ---
+            # Remove antigos
+            cliente.prontas_respostas.all().delete()
+            cliente.telefones.all().delete()
+            # Prontas respostas
+            prontas_respostas = request.POST.getlist('prontas_respostas_json')
+            for ordem, pr in enumerate(prontas_respostas):
+                if pr:
+                    ClienteProntaResposta.objects.create(
+                        cliente=cliente,
+                        pronta_resposta=pr,
+                        ordem=ordem
+                    )
+            # Telefones
+            telefones = request.POST.getlist('telefones_json')
+            for ordem, tel_json in enumerate(telefones):
+                try:
+                    tel = json.loads(tel_json)
+                    if tel.get('telefone'):
+                        ClienteTelefone.objects.create(
+                            cliente=cliente,
+                            telefone=tel['telefone'],
+                            tipo=tel.get('tipo', ''),
+                            ordem=ordem
+                        )
+                except Exception:
+                    continue
+            return redirect('clientes:locais')
     else:
         if cliente_id:
             cliente = get_object_or_404(Clientes, id=cliente_id)
@@ -63,6 +91,72 @@ def clientes_view(request):
         'cliente_id': cliente_id or '',
         'produtos': produtos,
     })
+
+@login_required
+def adicionar_pronta_resposta(request, cliente_id):
+    """Adiciona uma nova pronta resposta ao cliente"""
+    if request.method == 'POST':
+        cliente = get_object_or_404(Clientes, id=cliente_id)
+        pronta_resposta = request.POST.get('pronta_resposta')
+        
+        if pronta_resposta:
+            # Encontrar a próxima ordem
+            ultima_ordem = ClienteProntaResposta.objects.filter(cliente=cliente).aggregate(
+                Max('ordem')
+            )['ordem__max'] or 0
+            
+            ClienteProntaResposta.objects.create(
+                cliente=cliente,
+                pronta_resposta=pronta_resposta,
+                ordem=ultima_ordem + 1
+            )
+            return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'error': 'Método não permitido'})
+
+@login_required
+def adicionar_telefone(request, cliente_id):
+    """Adiciona um novo telefone ao cliente"""
+    if request.method == 'POST':
+        cliente = get_object_or_404(Clientes, id=cliente_id)
+        telefone = request.POST.get('telefone')
+        tipo = request.POST.get('tipo', '')
+        
+        if telefone:
+            # Encontrar a próxima ordem
+            ultima_ordem = ClienteTelefone.objects.filter(cliente=cliente).aggregate(
+                Max('ordem')
+            )['ordem__max'] or 0
+            
+            ClienteTelefone.objects.create(
+                cliente=cliente,
+                telefone=telefone,
+                tipo=tipo,
+                ordem=ultima_ordem + 1
+            )
+            return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'error': 'Método não permitido'})
+
+@login_required
+def remover_pronta_resposta(request, cliente_id, pronta_resposta_id):
+    """Remove uma pronta resposta do cliente"""
+    if request.method == 'POST':
+        pronta_resposta = get_object_or_404(ClienteProntaResposta, id=pronta_resposta_id, cliente_id=cliente_id)
+        pronta_resposta.delete()
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'error': 'Método não permitido'})
+
+@login_required
+def remover_telefone(request, cliente_id, telefone_id):
+    """Remove um telefone do cliente"""
+    if request.method == 'POST':
+        telefone = get_object_or_404(ClienteTelefone, id=telefone_id, cliente_id=cliente_id)
+        telefone.delete()
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'error': 'Método não permitido'})
 
 @login_required
 def carregar_mais_clientes(request):
@@ -127,12 +221,35 @@ def get_cliente(request, cliente_id):
         }
         for rel in cliente.produtos_relacionados.all()
     ]
+    
+    # Buscar prontas respostas e telefones
+    prontas_respostas = [
+        {
+            'id': pr.id,
+            'pronta_resposta': pr.pronta_resposta,
+            'ordem': pr.ordem
+        }
+        for pr in cliente.prontas_respostas.all()
+    ]
+    
+    telefones = [
+        {
+            'id': tel.id,
+            'telefone': tel.telefone,
+            'tipo': tel.tipo,
+            'ordem': tel.ordem
+        }
+        for tel in cliente.telefones.all()
+    ]
+    
     data = {
         'id': cliente.id,
         'nome': cliente.nome,
         'pronta_resposta': cliente.pronta_resposta,
         'telefone': cliente.telefone,
         'produtos': produtos,
+        'prontas_respostas': prontas_respostas,
+        'telefones': telefones,
     }
     return JsonResponse({'success': True, 'cliente': data})
 
@@ -163,13 +280,35 @@ def locais_json(request):
                 'quantidade': rel.quantidade
             })
         
+        # Buscar prontas respostas e telefones
+        prontas_respostas = [
+            {
+                'id': pr.id,
+                'pronta_resposta': pr.pronta_resposta,
+                'ordem': pr.ordem
+            }
+            for pr in cliente.prontas_respostas.all()
+        ]
+        
+        telefones = [
+            {
+                'id': tel.id,
+                'telefone': tel.telefone,
+                'tipo': tel.tipo,
+                'ordem': tel.ordem
+            }
+            for tel in cliente.telefones.all()
+        ]
+        
         cliente_data = {
             'id': cliente.id,
             'nome': cliente.nome,
             'pronta_resposta': cliente.pronta_resposta,
             'telefone': cliente.telefone,
             'total_produtos': cliente.total_produtos,
-            'produtos_relacionados': produtos_relacionados
+            'produtos_relacionados': produtos_relacionados,
+            'prontas_respostas': prontas_respostas,
+            'telefones': telefones,
         }
         data.append(cliente_data)
     
@@ -184,3 +323,36 @@ def lista_clientes_partial(request):
     clientes = Clientes.objects.all()
     html = render_to_string('clientes/partials/lista_clientes.html', {'clientes': clientes})
     return JsonResponse({'html': html})
+
+@login_required
+@csrf_exempt
+def adicionar_pronta_telefone(request, cliente_id):
+    if request.method == 'POST':
+        cliente = get_object_or_404(Clientes, id=cliente_id)
+        pronta_resposta = request.POST.get('pronta_resposta')
+        telefone = request.POST.get('telefone')
+        tipo = request.POST.get('tipo', '')
+
+        # Adiciona pronta resposta se preenchido
+        if pronta_resposta:
+            ultima_ordem = ClienteProntaResposta.objects.filter(cliente=cliente).aggregate(
+                Max('ordem')
+            )['ordem__max'] or 0
+            ClienteProntaResposta.objects.create(
+                cliente=cliente,
+                pronta_resposta=pronta_resposta,
+                ordem=ultima_ordem + 1
+            )
+        # Adiciona telefone se preenchido
+        if telefone:
+            ultima_ordem = ClienteTelefone.objects.filter(cliente=cliente).aggregate(
+                Max('ordem')
+            )['ordem__max'] or 0
+            ClienteTelefone.objects.create(
+                cliente=cliente,
+                telefone=telefone,
+                tipo=tipo,
+                ordem=ultima_ordem + 1
+            )
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Método não permitido'})
