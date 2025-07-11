@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resumo de Licenças{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-10 flex flex-col items-center min-h-[60vh] animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full max-w-7xl mb-8 gap-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-chart-pie text-3xl text-white bg-purple-800 rounded-full p-2"></i>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">Resumo de Licenças</h2>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'estoque:licencas_create' %}" class="px-6 py-2 text-lg font-semibold shadow rounded bg-blue-800 text-white hover:bg-blue-900 transition">+ Nova Licença</a>
+            <a href="{% url 'estoque:produto_create' %}" class="px-6 py-2 text-lg font-semibold shadow rounded bg-green-800 text-white hover:bg-green-900 transition">+ Adicionar Produto</a>
+            <a href="{% url 'estoque:produto_list' %}" class="px-6 py-2 text-lg font-semibold shadow rounded bg-red-800 text-white hover:bg-red-900 transition">Ver Todos Produtos</a>
+        </div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="w-full max-w-7xl mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl shadow-2xl border border-green-200 p-6">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-cube text-3xl text-green-600"></i>
+                    <div>
+                        <p class="text-sm text-gray-600">Total de Produtos</p>
+                        <p class="text-2xl font-bold text-green-600">{{ total_produtos }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-2xl border border-orange-200 p-6">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-chart-line text-3xl text-orange-600"></i>
+                    <div>
+                        <p class="text-sm text-gray-600">Licenças Disponíveis</p>
+                        <p class="text-2xl font-bold text-orange-600">
+                            {{ total_licencas_disponiveis }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalhamento por Produto -->
+    <div class="w-full max-w-7xl bg-white rounded-2xl shadow-2xl border border-gray-200 p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <i class="fas fa-list text-2xl text-gray-800"></i>
+            <h3 class="text-2xl font-bold text-gray-800">Detalhamento por Produto</h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Produto</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Licenças Registradas</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Licenças Disponíveis</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for info in produtos_info %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-cube text-red-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ info.produto.nome }}</div>
+                                    <div class="text-sm text-gray-500">ID: {{ info.produto.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-semibold text-blue-600">{{ info.licencas_registradas }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if info.licencas_disponiveis is not None %}
+                                <span class="font-semibold text-orange-600">{{ info.licencas_disponiveis }}</span>
+                            {% else %}
+                                <span class="text-gray-400 italic">Indefinido</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if info.licencas_disponiveis > 0 %}
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Disponível</span>
+                            {% elif info.licencas_disponiveis == 0 %}
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Esgotado</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Indefinido</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex gap-2">
+                                <a href="{% url 'estoque:licencas_create' %}?produto={{ info.produto.id }}" 
+                                   class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                    + Licença
+                                </a>
+                                <a href="{% url 'estoque:licencas_list' %}" 
+                                   class="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+                                    Ver Todas
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            Nenhum produto cadastrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes fade-in { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+.animate-fade-in { animation: fade-in 0.7s ease; }
+</style>
+{% endblock %} 

@@ -36,7 +36,7 @@ class OrpecasView(View):
         return render(request, 'orpecas/orpecas.html', context)
 
     def post(self, request):
-        form = OrpecasForm(request.POST)
+        form = OrpecasForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('orpecas:orpecas')
@@ -56,6 +56,8 @@ def get_orpecas(request, orpecas_id):
             'diagnostico': orpecas.diagnostico or '',
             'botao_panico': orpecas.botao_panico or '',
             'sensor': orpecas.sensor or '',
+            'imagem_url': orpecas.imagem.url if orpecas.imagem else None,
+            'imagem_nome': orpecas.imagem.name if orpecas.imagem else None,
         }
     }
     return JsonResponse(data)
@@ -63,7 +65,7 @@ def get_orpecas(request, orpecas_id):
 def atualizar_orpecas(request, orpecas_id):
     orpecas = get_object_or_404(Orpecas, id=orpecas_id)
     if request.method == 'POST':
-        form = OrpecasForm(request.POST, instance=orpecas)
+        form = OrpecasForm(request.POST, request.FILES, instance=orpecas)
         if form.is_valid():
             form.save()
             return redirect('orpecas:orpecas')

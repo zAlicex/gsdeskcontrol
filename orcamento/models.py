@@ -12,6 +12,7 @@ class Orcamento(models.Model):
     data_acionamento = models.DateTimeField(null=True, blank=True)
     data_chegada = models.DateTimeField(null=True, blank=True)
     sla_resposta = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'),null=True, blank=True)
+    imagem = models.ImageField(upload_to='orcamentos/', null=True, blank=True, verbose_name="Imagem")
 
     class Meta:
         verbose_name = 'Orçamento'

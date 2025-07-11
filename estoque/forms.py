@@ -1,5 +1,5 @@
 from django import forms
-from .models import Estoque, Produto
+from .models import Estoque, Produto, Licencas
 
 class EstoqueForm(forms.ModelForm):
     class Meta:
@@ -15,7 +15,18 @@ class EstoqueForm(forms.ModelForm):
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ['nome']
+        fields = ['nome', 'quantidade']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '0', 'placeholder': 'Quantidade disponível'}),
+        }
+
+class LicencaForm(forms.ModelForm):
+    class Meta:
+        model = Licencas
+        fields = ['produto', 'quantidade', 'valor']
+        widgets = {
+            'produto': forms.Select(attrs={'class': 'input input-bordered w-full'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '1', 'placeholder': 'Quantidade de licenças'}),
+            'valor': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '0', 'step': '0.01', 'placeholder': 'Valor da licença'}),
         } 

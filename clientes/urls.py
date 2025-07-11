@@ -19,6 +19,9 @@ urlpatterns = [
 
     # API de locais
     path('locais-api/', views.locais_api, name='locais_api'),
+    
+    # Endpoint JSON com todas as informações dos clientes
+    path('locais_json/', views.locais_json, name='locais_json'),
 
     # URL para carregar a lista de clientes via AJAX (partial)
     path('lista_clientes_partial/', views.lista_clientes_partial, name='lista_clientes_partial'),

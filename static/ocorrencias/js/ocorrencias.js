@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.className = 'btn-primary';
         cancelBtn.style.display = 'none';
         form.action = CREATE_URL;
+        
+        // Limpar preview da imagem
+        const preview = document.getElementById('imagem-preview');
+        if (preview) {
+            preview.classList.add('hidden');
+        }
+        
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -59,6 +66,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('data_hora').value = ocorrencia.data_hora || '';
                     document.getElementById('status').value = ocorrencia.status || '';
                     document.getElementById('observacoes').value = ocorrencia.observacoes || '';
+
+                    // Tratar imagem se existir
+                    const preview = document.getElementById('imagem-preview');
+                    const previewImg = document.getElementById('preview-img');
+                    if (ocorrencia.imagem_url && preview && previewImg) {
+                        previewImg.src = ocorrencia.imagem_url;
+                        preview.classList.remove('hidden');
+                    } else if (preview) {
+                        preview.classList.add('hidden');
+                    }
 
                     // Atualiza a UI para o modo de edição
                     ocorrenciaIdField.value = ocorrencia.id;
@@ -210,6 +227,12 @@ function limparFormulario() {
     document.getElementById('ocorrenciaForm').reset();
     document.getElementById('ocorrencia_id').value = '';
     document.getElementById('btnExcluir').style.display = 'none';
+    
+    // Limpar preview da imagem
+    const preview = document.getElementById('imagem-preview');
+    if (preview) {
+        preview.classList.add('hidden');
+    }
     
     // Remover seleção dos itens
     document.querySelectorAll('.ocorrencia-item').forEach(item => {

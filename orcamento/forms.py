@@ -22,9 +22,10 @@ class OrcamentoForm(forms.ModelForm):
     
     class Meta:
         model = Orcamento
-        fields = ['nome_local', 'nome_usuarios', 'data_acionamento', 'data_chegada', 'sla_resposta']
+        fields = ['nome_local', 'nome_usuarios', 'data_acionamento', 'data_chegada', 'sla_resposta', 'imagem']
         widgets = {
             'nome_local': forms.Select(attrs={'class': 'w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500'}),
             'nome_usuarios': forms.Select(attrs={'class': 'w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500'}),
             'sla_resposta': forms.NumberInput(attrs={'class': 'w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500', 'readonly': 'readonly'}),
+            'imagem': forms.FileInput(attrs={'class': 'w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500', 'accept': 'image/*'}),
         } 

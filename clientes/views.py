@@ -130,6 +130,8 @@ def get_cliente(request, cliente_id):
     data = {
         'id': cliente.id,
         'nome': cliente.nome,
+        'pronta_resposta': cliente.pronta_resposta,
+        'telefone': cliente.telefone,
         'produtos': produtos,
     }
     return JsonResponse({'success': True, 'cliente': data})
@@ -142,6 +144,40 @@ def locais_api(request):
     """
     locais = Clientes.objects.all().values('id', 'nome')
     return JsonResponse(list(locais), safe=False)
+
+@login_required
+def locais_json(request):
+    """
+    Endpoint JSON que retorna todas as informações dos clientes.
+    """
+    clientes = Clientes.objects.all()
+    
+    data = []
+    for cliente in clientes:
+        # Buscar produtos relacionados
+        produtos_relacionados = []
+        for rel in cliente.produtos_relacionados.all():
+            produtos_relacionados.append({
+                'produto_id': rel.produto.id,
+                'produto_nome': rel.produto.nome,
+                'quantidade': rel.quantidade
+            })
+        
+        cliente_data = {
+            'id': cliente.id,
+            'nome': cliente.nome,
+            'pronta_resposta': cliente.pronta_resposta,
+            'telefone': cliente.telefone,
+            'total_produtos': cliente.total_produtos,
+            'produtos_relacionados': produtos_relacionados
+        }
+        data.append(cliente_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_locais': len(data),
+        'clientes': data
+    }, safe=False)
 
 def lista_clientes_partial(request):
     from .models import Clientes

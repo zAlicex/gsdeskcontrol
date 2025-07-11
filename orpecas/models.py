@@ -13,6 +13,7 @@ class Orpecas(models.Model):
     diagnostico = models.CharField(max_length=255, choices=CHOICES, null=True, blank=True)
     botao_panico = models.CharField(max_length=255, choices=CHOICES, null=True, blank=True)
     sensor = models.CharField(max_length=255, choices=CHOICES, null=True, blank=True)
+    imagem = models.ImageField(upload_to='orpecas/', null=True, blank=True, verbose_name="Imagem")
     
     def __str__(self):
         return f" {self.local}"

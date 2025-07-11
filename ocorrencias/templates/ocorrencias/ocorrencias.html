@@ -6,6 +6,45 @@
 {% block extra_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'ocorrencias/css/ocorrencias.css' %}">
+    <style>
+        /* Estilos do modal */
+        #imagem-modal {
+            backdrop-filter: blur(5px);
+        }
+        
+        #modal-imagem {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+        
+        #fechar-modal {
+            transition: all 0.2s ease;
+        }
+        
+        #fechar-modal:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Estilos da imagem na listagem */
+        .ocorrencia-item img {
+            transition: all 0.2s ease;
+        }
+        
+        .ocorrencia-item img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Modal responsivo */
+        @media (max-width: 768px) {
+            #modal-imagem {
+                max-width: 95vw;
+                max-height: 80vh;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +62,7 @@
         <!-- Left Column - Form (60%) -->
         <div id="form-column" class="lg:w-3/5 space-y-6">
             <div class="bg-slate-200 rounded-lg shadow-lg p-6 compact-form">
-                <form method="post" action="{% url 'ocorrencias:ocorrencias' %}" class="ocorrencia-form" id="ocorrenciaForm">
+                <form method="post" action="{% url 'ocorrencias:ocorrencias' %}" enctype="multipart/form-data" class="ocorrencia-form" id="ocorrenciaForm">
                     {% csrf_token %}
                     <input type="hidden" name="id" id="ocorrencia_id" value="">
                     
@@ -63,6 +102,14 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                         <textarea name="observacoes" id="observacoes" rows="3" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Imagem</label>
+                        <input type="file" name="imagem" id="imagem" accept="image/*" class="w-full py-1 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500">
+                        <div id="imagem-preview" class="mt-2 hidden">
+                            <img id="preview-img" src="" alt="Preview da imagem" class="max-w-xs rounded border cursor-pointer hover:opacity-80 transition-opacity" title="Clique para ampliar">
+                        </div>
                     </div>
 
                     <div class="flex justify-end mt-6">
@@ -109,9 +156,102 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para exibir imagem -->
+    <div id="imagem-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 max-w-7xl w-full max-h-full overflow-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Visualizar Imagem</h3>
+                <button id="fechar-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="flex justify-center">
+                <img id="modal-imagem" src="" alt="Imagem da ocorrência" class="max-w-full max-h-[80vh] object-contain">
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
     {{ block.super }}
     <script src="{% static 'ocorrencias/js/ocorrencias.js' %}?v={% now "U" %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM carregado, inicializando modal...');
+        // Modal para exibir imagem
+        const modal = document.getElementById('imagem-modal');
+        const modalImagem = document.getElementById('modal-imagem');
+        const fecharModal = document.getElementById('fechar-modal');
+        
+        console.log('Elementos do modal:', { modal: !!modal, modalImagem: !!modalImagem, fecharModal: !!fecharModal });
+
+        // Função para abrir modal
+        window.abrirModalImagem = function(src) {
+            console.log('Abrindo modal com imagem:', src);
+            if (modalImagem && modal) {
+                modalImagem.src = src;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Previne scroll da página
+                console.log('Modal aberto com sucesso');
+            } else {
+                console.error('Elementos do modal não encontrados:', { modalImagem: !!modalImagem, modal: !!modal });
+            }
+        };
+
+        // Função para fechar modal
+        function fecharModalImagem() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restaura scroll da página
+        }
+
+        // Event listeners
+        if (fecharModal) {
+            fecharModal.addEventListener('click', fecharModalImagem);
+        }
+
+        // Fechar modal ao clicar fora da imagem
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    fecharModalImagem();
+                }
+            });
+        }
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                fecharModalImagem();
+            }
+        });
+
+        // Preview da imagem no formulário
+        const imagemInput = document.getElementById('imagem');
+        const preview = document.getElementById('imagem-preview');
+        const previewImg = document.getElementById('preview-img');
+        
+        if (imagemInput) {
+            imagemInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        preview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.classList.add('hidden');
+                }
+            });
+        }
+
+        // Tornar preview da imagem clicável
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'preview-img') {
+                abrirModalImagem(e.target.src);
+            }
+        });
+    });
+    </script>
 {% endblock %} 

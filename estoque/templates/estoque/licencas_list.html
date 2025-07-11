@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Licenças{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-10 flex flex-col items-center min-h-[60vh] animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full max-w-6xl mb-8 gap-4">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-key text-3xl text-white bg-blue-800 rounded-full p-2"></i>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">Licenças</h2>
+        </div>
+        <a href="{% url 'estoque:licencas_create' %}" class="px-6 py-2 text-lg font-semibold shadow rounded bg-blue-800 text-white hover:bg-blue-900 transition">+ Nova Licença</a>
+    </div>
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-blue-200 p-8">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr class="bg-blue-50">
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Produto</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Quantidade</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Valor</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Data de Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for licenca in licencas %}
+                <tr class="border-b hover:bg-blue-50 transition">
+                    <td class="px-4 py-2 font-mono text-gray-700">{{ licenca.id }}</td>
+                    <td class="px-4 py-2 font-semibold text-gray-800">{{ licenca.produto.nome }}</td>
+                    <td class="px-4 py-2 text-gray-700">
+                        <span class="font-semibold text-blue-600">{{ licenca.quantidade }}</span>
+                    </td>
+                    <td class="px-4 py-2 text-gray-700">
+                        <span class="font-semibold text-green-600">R$ {{ licenca.valor|floatformat:2 }}</span>
+                    </td>
+                    <td class="px-4 py-2 text-gray-700">
+                        {{ licenca.data_registro|date:"d/m/Y H:i" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-6 text-gray-500">Nenhuma licença registrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+@keyframes fade-in { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+.animate-fade-in { animation: fade-in 0.7s ease; }
+</style>
+{% endblock %} 

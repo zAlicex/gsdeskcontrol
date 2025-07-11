@@ -3,12 +3,26 @@
         <div class="orpecas-item px-6 py-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors" 
              data-orpecas-id="{{ orpecas.pk }}"
              onclick="carregarOrpecas('{{ orpecas.pk }}');">
-            <div class="text-sm">
-                <div class="font-medium text-gray-900">{{ orpecas.local.nome|default:"-" }}</div>
-                <div class="text-gray-600">
-                    Diagnóstico: {{ orpecas.diagnostico|default:"-" }} | 
-                    Botão Pânico: {{ orpecas.botao_panico|default:"-" }} | 
-                    Sensor: {{ orpecas.sensor|default:"-" }}
+            <div class="flex justify-between items-start">
+                <div class="text-sm flex-1">
+                    <div class="font-medium text-gray-900">{{ orpecas.local.nome|default:"-" }}</div>
+                    <div class="text-gray-600">
+                        Diagnóstico: {{ orpecas.diagnostico|default:"-" }} | 
+                        Botão Pânico: {{ orpecas.botao_panico|default:"-" }} | 
+                        Sensor: {{ orpecas.sensor|default:"-" }}
+                    </div>
+                    {% if orpecas.imagem %}
+                    <div class="mt-2">
+                        <img src="{{ orpecas.imagem.url }}" 
+                             alt="Imagem do sensor" 
+                             class="w-16 h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity" 
+                             onclick="event.stopPropagation(); if(typeof abrirModalImagem === 'function') abrirModalImagem('{{ orpecas.imagem.url }}')"
+                             title="Clique para ampliar">
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="ml-4">
+                    <i class="fas fa-edit text-blue-500 text-lg"></i>
                 </div>
             </div>
         </div>

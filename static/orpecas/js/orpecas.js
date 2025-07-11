@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
         form.action = CREATE_URL;
         form.scrollIntoView({ behavior: 'smooth' });
         
+        // Limpar preview da imagem
+        const preview = document.getElementById('imagem-preview');
+        if (preview) {
+            preview.classList.add('hidden');
+        }
+        
         // Remover seleção de todos os itens
         document.querySelectorAll('.orpecas-item').forEach(item => {
             item.classList.remove('selected');
@@ -78,6 +84,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (diagnosticoField) diagnosticoField.value = orpecas.diagnostico;
                     if (botaoPanicoField) botaoPanicoField.value = orpecas.botao_panico;
                     if (sensorField) sensorField.value = orpecas.sensor;
+
+                    // Processar imagem se existir
+                    const preview = document.getElementById('imagem-preview');
+                    const previewImg = document.getElementById('preview-img');
+                    if (orpecas.imagem_url && preview && previewImg) {
+                        previewImg.src = orpecas.imagem_url;
+                        preview.classList.remove('hidden');
+                    } else if (preview) {
+                        preview.classList.add('hidden');
+                    }
 
                     // Atualiza a UI para modo de edição
                     formTitle.textContent = `Editar Orpecas: ${orpecas.id}`;
