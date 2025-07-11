@@ -43,6 +43,244 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.cliente-item').forEach(item => {
             item.classList.remove('selected');
         });
+        
+        // Limpar containers dinâmicos
+        limparProntasRespostas();
+        limparTelefones();
+    }
+
+    /**
+     * Limpa o container de prontas respostas
+     */
+    function limparProntasRespostas() {
+        const container = document.getElementById('prontas-respostas-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+    }
+
+    /**
+     * Limpa o container de telefones
+     */
+    function limparTelefones() {
+        const container = document.getElementById('telefones-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+    }
+
+    /**
+     * Adiciona uma nova pronta resposta dinamicamente
+     */
+    function adicionarProntaResposta() {
+        const clienteId = clienteIdField.value;
+        if (!clienteId) {
+            alert('Selecione um cliente primeiro');
+            return;
+        }
+
+        const prontaResposta = prompt('Digite a pronta resposta:');
+        if (!prontaResposta) return;
+
+        const formData = new FormData();
+        formData.append('pronta_resposta', prontaResposta);
+
+        fetch(`/locais/cliente/${clienteId}/adicionar-pronta-resposta/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarProntasRespostas(clienteId);
+            } else {
+                alert('Erro ao adicionar pronta resposta: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao adicionar pronta resposta');
+        });
+    }
+
+    /**
+     * Remove uma pronta resposta
+     */
+    function removerProntaResposta(prontaRespostaId) {
+        const clienteId = clienteIdField.value;
+        if (!confirm('Tem certeza que deseja remover esta pronta resposta?')) return;
+
+        fetch(`/locais/cliente/${clienteId}/remover-pronta-resposta/${prontaRespostaId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarProntasRespostas(clienteId);
+            } else {
+                alert('Erro ao remover pronta resposta: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao remover pronta resposta');
+        });
+    }
+
+    /**
+     * Carrega as prontas respostas do cliente
+     */
+    function carregarProntasRespostas(clienteId) {
+        fetch(`/locais/get_cliente/${clienteId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('prontas-respostas-container');
+                if (container) {
+                    container.innerHTML = '';
+                    data.cliente.prontas_respostas.forEach(pr => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded mb-2';
+                        item.innerHTML = `
+                            <span>${pr.pronta_resposta}</span>
+                            <button type="button" onclick="removerProntaResposta(${pr.id})" 
+                                    class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar prontas respostas:', error);
+        });
+    }
+
+    /**
+     * Adiciona um novo telefone dinamicamente
+     */
+    function adicionarTelefone() {
+        const clienteId = clienteIdField.value;
+        if (!clienteId) {
+            alert('Selecione um cliente primeiro');
+            return;
+        }
+
+        const telefone = prompt('Digite o telefone:');
+        if (!telefone) return;
+
+        const tipo = prompt('Digite o tipo (ex: Celular, Fixo) - opcional:') || '';
+
+        const formData = new FormData();
+        formData.append('telefone', telefone);
+        formData.append('tipo', tipo);
+
+        fetch(`/locais/cliente/${clienteId}/adicionar-telefone/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarTelefones(clienteId);
+            } else {
+                alert('Erro ao adicionar telefone: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao adicionar telefone');
+        });
+    }
+
+    /**
+     * Remove um telefone
+     */
+    function removerTelefone(telefoneId) {
+        const clienteId = clienteIdField.value;
+        if (!confirm('Tem certeza que deseja remover este telefone?')) return;
+
+        fetch(`/locais/cliente/${clienteId}/remover-telefone/${telefoneId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                carregarTelefones(clienteId);
+            } else {
+                alert('Erro ao remover telefone: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao remover telefone');
+        });
+    }
+
+    /**
+     * Carrega os telefones do cliente
+     */
+    function carregarTelefones(clienteId) {
+        fetch(`/locais/get_cliente/${clienteId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('telefones-container');
+                if (container) {
+                    container.innerHTML = '';
+                    data.cliente.telefones.forEach(tel => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded mb-2';
+                        item.innerHTML = `
+                            <div>
+                                <span class="font-medium">${tel.telefone}</span>
+                                ${tel.tipo ? `<span class="text-sm text-gray-500 ml-2">(${tel.tipo})</span>` : ''}
+                            </div>
+                            <button type="button" onclick="removerTelefone(${tel.id})" 
+                                    class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar telefones:', error);
+        });
+    }
+
+    /**
+     * Função para obter o token CSRF
+     */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
     /**
@@ -105,6 +343,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         row.querySelector('.remover-produto').style.display = 'none';
                     }
 
+                    // Carregar prontas respostas e telefones dinâmicos
+                    carregarProntasRespostas(cliente.id);
+                    carregarTelefones(cliente.id);
+                    carregarProntasTelefones(cliente.id);
+
                     formTitle.textContent = `Editar Local: ${cliente.nome}`;
                     submitBtn.textContent = 'Atualizar';
                     // Remover qualquer linha como: form.action = UPDATE_URL_TEMPLATE.replace('0', cliente.id);
@@ -120,6 +363,206 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(`Erro ao carregar cliente: ${error.message}`);
                 formTitle.textContent = 'Novo Local';
             });
+    }
+
+    // Expor funções globalmente
+    window.adicionarProntaResposta = adicionarProntaResposta;
+    window.removerProntaResposta = removerProntaResposta;
+    window.adicionarTelefone = adicionarTelefone;
+    window.removerTelefone = removerTelefone;
+    window.abrirAdicionarProntaTelefone = abrirAdicionarProntaTelefone;
+
+    // --- ARRAYS LOCAIS PARA ITENS DINÂMICOS ---
+    let prontasRespostasTemp = [];
+    let telefonesTemp = [];
+
+    // Renderiza os itens dinâmicos na tela
+    function renderProntasTelefones() {
+        const container = document.getElementById('prontas-telefones-container');
+        container.innerHTML = '';
+        // Prontas Respostas
+        if (prontasRespostasTemp.length > 0) {
+            const prontasDiv = document.createElement('div');
+            prontasDiv.className = 'mb-3';
+            prontasDiv.innerHTML = '<div class="text-sm font-medium text-gray-700 mb-2">Prontas Respostas:</div>';
+            prontasRespostasTemp.forEach((pr, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-white rounded border mb-1';
+                item.innerHTML = `
+                    <span class="text-sm">${pr}</span>
+                    <button type="button" class="text-red-600 hover:text-red-800 text-sm" onclick="window.removerProntaRespostaTemp(${idx})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                prontasDiv.appendChild(item);
+            });
+            container.appendChild(prontasDiv);
+        }
+        // Telefones
+        if (telefonesTemp.length > 0) {
+            const telefonesDiv = document.createElement('div');
+            telefonesDiv.className = 'mb-3';
+            telefonesDiv.innerHTML = '<div class="text-sm font-medium text-gray-700 mb-2">Telefones:</div>';
+            telefonesTemp.forEach((tel, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 bg-white rounded border mb-1';
+                item.innerHTML = `
+                    <div class="text-sm">
+                        <span class="font-medium">${tel.telefone}</span>
+                        ${tel.tipo ? `<span class="text-gray-500 ml-2">(${tel.tipo})</span>` : ''}
+                    </div>
+                    <button type="button" class="text-red-600 hover:text-red-800 text-sm" onclick="window.removerTelefoneTemp(${idx})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                telefonesDiv.appendChild(item);
+            });
+            container.appendChild(telefonesDiv);
+        }
+        // Se não há itens, mostrar mensagem
+        if (prontasRespostasTemp.length === 0 && telefonesTemp.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'text-gray-500 text-sm italic';
+            emptyDiv.textContent = 'Nenhum item adicional cadastrado';
+            container.appendChild(emptyDiv);
+        }
+    }
+
+    // Funções globais para remover itens
+    window.removerProntaRespostaTemp = function(idx) {
+        prontasRespostasTemp.splice(idx, 1);
+        renderProntasTelefones();
+    };
+    window.removerTelefoneTemp = function(idx) {
+        telefonesTemp.splice(idx, 1);
+        renderProntasTelefones();
+    };
+
+    // Novo abrirAdicionarProntaTelefone para modo criação
+    function abrirAdicionarProntaTelefone() {
+        // Adiciona uma nova linha de input para pronta resposta e telefone
+        const container = document.getElementById('prontas-telefones-container');
+        // Cria linha de input
+        const linhaDiv = document.createElement('div');
+        linhaDiv.className = 'flex gap-2 items-center mb-2 pronta-telefone-linha';
+        linhaDiv.innerHTML = `
+            <input type="text" placeholder="Pronta Resposta" class="form-control flex-1" autocomplete="off">
+            <input type="text" placeholder="Telefone" class="form-control flex-1" autocomplete="off">
+            <input type="text" placeholder="Tipo (opcional)" class="form-control" style="width: 120px;">
+            <button type="button" class="text-red-600 hover:text-red-800 text-sm btn-remover-linha"><i class="fas fa-trash"></i></button>
+        `;
+        container.appendChild(linhaDiv);
+        const [inputPronta, inputTel, inputTipo, btnRemover] = linhaDiv.querySelectorAll('input,button');
+        inputPronta.focus();
+        // Função para salvar a linha
+        function salvarLinha() {
+            const pronta = inputPronta.value.trim();
+            const tel = inputTel.value.trim();
+            const tipo = inputTipo.value.trim();
+            let added = false;
+            if (pronta) {
+                prontasRespostasTemp.push(pronta);
+                added = true;
+            }
+            if (tel) {
+                telefonesTemp.push({ telefone: tel, tipo: tipo });
+                added = true;
+            }
+            if (added) {
+                renderProntasTelefones();
+                linhaDiv.remove();
+            }
+        }
+        // Enter para salvar
+        inputPronta.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); salvarLinha(); }
+        });
+        inputTel.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); salvarLinha(); }
+        });
+        inputTipo.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); salvarLinha(); }
+        });
+        // Blur para salvar
+        inputPronta.addEventListener('blur', function() { if (this.value.trim()) salvarLinha(); });
+        inputTel.addEventListener('blur', function() { if (this.value.trim()) salvarLinha(); });
+        // Remover linha
+        btnRemover.onclick = function() { linhaDiv.remove(); };
+    }
+    window.abrirAdicionarProntaTelefone = abrirAdicionarProntaTelefone;
+
+    function carregarProntasTelefones(clienteId) {
+        fetch(`/locais/get_cliente/${clienteId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('prontas-telefones-container');
+                
+                // Limpar apenas os itens existentes, mantendo o formulário se estiver aberto
+                const formDiv = document.getElementById('form-pronta-telefone');
+                container.innerHTML = '';
+                if (formDiv) {
+                    container.appendChild(formDiv);
+                }
+
+                // Adicionar prontas respostas
+                if (data.cliente.prontas_respostas && data.cliente.prontas_respostas.length > 0) {
+                    const prontasDiv = document.createElement('div');
+                    prontasDiv.className = 'mb-3';
+                    prontasDiv.innerHTML = '<div class="text-sm font-medium text-gray-700 mb-2">Prontas Respostas:</div>';
+                    
+                    data.cliente.prontas_respostas.forEach(pr => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-2 bg-white rounded border mb-1';
+                        item.innerHTML = `
+                            <span class="text-sm">${pr.pronta_resposta}</span>
+                            <button type="button" onclick="removerProntaResposta(${pr.id})" 
+                                    class="text-red-600 hover:text-red-800 text-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        prontasDiv.appendChild(item);
+                    });
+                    container.appendChild(prontasDiv);
+                }
+
+                // Adicionar telefones
+                if (data.cliente.telefones && data.cliente.telefones.length > 0) {
+                    const telefonesDiv = document.createElement('div');
+                    telefonesDiv.className = 'mb-3';
+                    telefonesDiv.innerHTML = '<div class="text-sm font-medium text-gray-700 mb-2">Telefones:</div>';
+                    
+                    data.cliente.telefones.forEach(tel => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-2 bg-white rounded border mb-1';
+                        item.innerHTML = `
+                            <div class="text-sm">
+                                <span class="font-medium">${tel.telefone}</span>
+                                ${tel.tipo ? `<span class="text-gray-500 ml-2">(${tel.tipo})</span>` : ''}
+                            </div>
+                            <button type="button" onclick="removerTelefone(${tel.id})" 
+                                    class="text-red-600 hover:text-red-800 text-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        telefonesDiv.appendChild(item);
+                    });
+                    container.appendChild(telefonesDiv);
+                }
+
+                // Se não há itens, mostrar mensagem
+                if ((!data.cliente.prontas_respostas || data.cliente.prontas_respostas.length === 0) && 
+                    (!data.cliente.telefones || data.cliente.telefones.length === 0)) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'text-gray-500 text-sm italic';
+                    emptyDiv.textContent = 'Nenhum item adicional cadastrado';
+                    container.appendChild(emptyDiv);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar prontas respostas e telefones:', error);
+        });
     }
 
     /**
@@ -200,30 +643,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Resetar formulário ao submeter (opcional)
-    form.addEventListener('submit', function(e) {
-        submitBtn.textContent = 'Salvando...';
-        submitBtn.disabled = true;
-        // Permite o envio padrão do formulário
-        setTimeout(function() {
-            // Após o submit, atualiza a listagem via AJAX
-            fetch('/clientes/lista_clientes_partial/')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('client-list-results').innerHTML = data.html;
-                    // Reaplica eventos de clique nos novos itens
-                    document.querySelectorAll('.cliente-item').forEach(function(item) {
-                        item.addEventListener('click', function() {
-                            const clienteId = this.getAttribute('data-cliente-id');
-                            window.carregarCliente(clienteId);
-                        });
-                    });
-                });
-        }, 500); // Pequeno delay para garantir que o backend já salvou
-    });
+    // Resetar arrays e renderização ao criar novo
+    function resetFormToCreateMode() {
+        console.log('Resetando formulário Cliente...');
+        form.reset();
+        clienteIdField.value = '';
+        formTitle.textContent = 'Novo Local';
+        submitBtn.textContent = 'Salvar';
+        submitBtn.className = 'btn-primary';
+        cancelBtn.style.display = 'none';
+        form.action = CREATE_URL;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Remover seleção de todos os itens
+        document.querySelectorAll('.cliente-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        
+        // Limpar containers dinâmicos
+        limparProntasRespostas();
+        limparTelefones();
+        prontasRespostasTemp = [];
+        telefonesTemp = [];
+        renderProntasTelefones();
+    }
 
     // Inicialização
     resetFormToCreateMode();
+
+    // Adicionar validação no submit
+    form.addEventListener('submit', function(e) {
+        // Remove campos antigos
+        form.querySelectorAll('.pronta-resposta-hidden, .telefone-hidden').forEach(el => el.remove());
+        // Adiciona prontas respostas
+        prontasRespostasTemp.forEach((pr, idx) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `prontas_respostas_json`;
+            input.value = pr;
+            input.className = 'pronta-resposta-hidden';
+            form.appendChild(input);
+        });
+        // Adiciona telefones
+        telefonesTemp.forEach((tel, idx) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `telefones_json`;
+            input.value = JSON.stringify(tel);
+            input.className = 'telefone-hidden';
+            form.appendChild(input);
+        });
+        // Validação: pelo menos 5 prontas respostas
+        if (prontasRespostasTemp.length < 5) {
+            e.preventDefault();
+            alert('Adicione pelo menos 5 Prontas Respostas antes de salvar!');
+            return false;
+        }
+    });
 
     console.log('=== CLIENTES JS INICIALIZADO ===');
 }); 

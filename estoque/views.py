@@ -40,9 +40,9 @@ def estoque(request):
     itens = Estoque.objects.all()
 
     if search_local:
-        itens = itens.filter(local__nome__icontains=search_local)
+        itens = itens.filter(local_nome_icontains=search_local)
     if search_usuario:
-        itens = itens.filter(usuario__nome__icontains=search_usuario)
+        itens = itens.filter(usuario_nome_icontains=search_usuario)
     if search_status:
         itens = itens.filter(status=search_status)
 
@@ -329,3 +329,257 @@ def all_models_json(request):
             data = [obj['fields'] | {'id': obj['pk']} for obj in data]
             all_data[f"{app_label}.{model_name}"] = data
     return JsonResponse(all_data, safe=False)
+
+def clientes_json(request):
+    """Endpoint JSON que retorna todas as informações dos clientes."""
+    from clientes.models import Clientes, ClienteProduto
+    
+    clientes = Clientes.objects.all()
+    cliente_produtos = ClienteProduto.objects.all().select_related('cliente', 'produto')
+    
+    clientes_data = []
+    for cliente in clientes:
+        cliente_data = {
+            'id': cliente.id,
+            'nome': cliente.nome,
+            'pronta_resposta': cliente.pronta_resposta,
+            'telefone': cliente.telefone,
+        }
+        clientes_data.append(cliente_data)
+    
+    cliente_produtos_data = []
+    for cp in cliente_produtos:
+        cp_data = {
+            'id': cp.id,
+            'cliente_id': cp.cliente.id,
+            'cliente_nome': cp.cliente.nome,
+            'produto_id': cp.produto.id,
+            'produto_nome': cp.produto.nome,
+            'quantidade': cp.quantidade,
+        }
+        cliente_produtos_data.append(cp_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_clientes': len(clientes_data),
+        'total_cliente_produtos': len(cliente_produtos_data),
+        'clientes': clientes_data,
+        'cliente_produtos': cliente_produtos_data,
+    }, safe=False)
+
+def orcamentos_json(request):
+    """Endpoint JSON que retorna todas as informações dos orçamentos."""
+    from orcamento.models import Orcamento
+    
+    orcamentos = Orcamento.objects.all().select_related('nome_local', 'nome_usuarios')
+    
+    orcamentos_data = []
+    for orcamento in orcamentos:
+        orcamento_data = {
+            'id': orcamento.id,
+            'nome_local_id': orcamento.nome_local.id if orcamento.nome_local else None,
+            'nome_local_nome': orcamento.nome_local.nome if orcamento.nome_local else '',
+            'nome_usuarios_id': orcamento.nome_usuarios.id if orcamento.nome_usuarios else None,
+            'nome_usuarios_nome': orcamento.nome_usuarios.nome if orcamento.nome_usuarios else '',
+            'data_acionamento': orcamento.data_acionamento.strftime('%Y-%m-%d %H:%M:%S') if orcamento.data_acionamento else None,
+            'data_chegada': orcamento.data_chegada.strftime('%Y-%m-%d %H:%M:%S') if orcamento.data_chegada else None,
+            'sla_resposta': str(orcamento.sla_resposta) if orcamento.sla_resposta else None,
+            'imagem': orcamento.imagem.url if orcamento.imagem else None,
+        }
+        orcamentos_data.append(orcamento_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_orcamentos': len(orcamentos_data),
+        'orcamentos': orcamentos_data,
+    }, safe=False)
+
+def orpecas_json(request):
+    """Endpoint JSON que retorna todas as informações dos orçamentos de peças."""
+    from orpecas.models import Orpecas
+    
+    orpecas = Orpecas.objects.all().select_related('local')
+    
+    orpecas_data = []
+    for orpeca in orpecas:
+        orpeca_data = {
+            'id': orpeca.id,
+            'local_id': orpeca.local.id if orpeca.local else None,
+            'local_nome': orpeca.local.nome if orpeca.local else '',
+            'diagnostico': orpeca.diagnostico,
+            'botao_panico': orpeca.botao_panico,
+            'sensor': orpeca.sensor,
+            'imagem': orpeca.imagem.url if orpeca.imagem else None,
+        }
+        orpecas_data.append(orpeca_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_orpecas': len(orpecas_data),
+        'orpecas': orpecas_data,
+    }, safe=False)
+
+def ocorrencias_json(request):
+    """Endpoint JSON que retorna todas as informações das ocorrências."""
+    from ocorrencias.models import Ocorrencia
+    
+    ocorrencias = Ocorrencia.objects.all().select_related('local')
+    
+    ocorrencias_data = []
+    for ocorrencia in ocorrencias:
+        ocorrencia_data = {
+            'id': ocorrencia.id,
+            'local_id': ocorrencia.local.id if ocorrencia.local else None,
+            'local_nome': ocorrencia.local.nome if ocorrencia.local else '',
+            'data_hora': ocorrencia.data_hora.strftime('%Y-%m-%d %H:%M:%S') if ocorrencia.data_hora else None,
+            'status': ocorrencia.status,
+            'status_display': ocorrencia.get_status_display(),
+            'observacoes': ocorrencia.observacoes,
+            'imagem': ocorrencia.imagem.url if ocorrencia.imagem else None,
+        }
+        ocorrencias_data.append(ocorrencia_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_ocorrencias': len(ocorrencias_data),
+        'ocorrencias': ocorrencias_data,
+    }, safe=False)
+
+def rat_json(request):
+    """Endpoint JSON que retorna todas as informações dos RATs."""
+    from rat.models import Rat
+    
+    rats = Rat.objects.all().select_related('local')
+    
+    rats_data = []
+    for rat in rats:
+        rat_data = {
+            'id': rat.id,
+            'local_id': rat.local.id if rat.local else None,
+            'local_nome': rat.local.nome if rat.local else '',
+            'nome': rat.nome,
+            'cpf': rat.cpf,
+            'tipo_servico': rat.tipo_servico,
+            'status': rat.status,
+            'status_display': rat.get_status_display(),
+        }
+        rats_data.append(rat_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_rats': len(rats_data),
+        'rats': rats_data,
+    }, safe=False)
+
+def agenda_json(request):
+    """Endpoint JSON que retorna todas as informações da agenda."""
+    from agenda.models import AgendaDia, Visita
+    
+    agenda_dias = AgendaDia.objects.all()
+    visitas = Visita.objects.all().select_related('agenda')
+    
+    agenda_dias_data = []
+    for dia in agenda_dias:
+        dia_data = {
+            'id': dia.id,
+            'data': dia.data.strftime('%Y-%m-%d'),
+            'dia_semana': dia.dia_semana,
+        }
+        agenda_dias_data.append(dia_data)
+    
+    visitas_data = []
+    for visita in visitas:
+        visita_data = {
+            'id': visita.id,
+            'agenda_id': visita.agenda.id if visita.agenda else None,
+            'agenda_data': visita.agenda.data.strftime('%Y-%m-%d') if visita.agenda else None,
+            'horario': visita.horario.strftime('%H:%M') if visita.horario else None,
+            'servico': visita.servico,
+            'cliente': visita.cliente,
+            'profissional': visita.profissional,
+            'observacoes': visita.observacoes,
+        }
+        visitas_data.append(visita_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_agenda_dias': len(agenda_dias_data),
+        'total_visitas': len(visitas_data),
+        'agenda_dias': agenda_dias_data,
+        'visitas': visitas_data,
+    }, safe=False)
+
+def pagpendentes_json(request):
+    """Endpoint JSON que retorna todas as informações dos pagamentos pendentes."""
+    from pagpendentes.models import PagPendente
+    
+    pag_pendentes = PagPendente.objects.all().select_related('local')
+    
+    pag_pendentes_data = []
+    for pag in pag_pendentes:
+        pag_data = {
+            'id': pag.id,
+            'local_id': pag.local.id if pag.local else None,
+            'local_nome': pag.local.nome if pag.local else '',
+            'data_hora': pag.data_hora.strftime('%Y-%m-%d %H:%M:%S') if pag.data_hora else None,
+            'status': pag.status,
+            'status_display': pag.get_status_display(),
+        }
+        pag_pendentes_data.append(pag_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_pag_pendentes': len(pag_pendentes_data),
+        'pag_pendentes': pag_pendentes_data,
+    }, safe=False)
+
+def treinamentos_json(request):
+    """Endpoint JSON que retorna todas as informações dos treinamentos."""
+    from treinamentos.models import Treinamento
+    
+    treinamentos = Treinamento.objects.all().select_related('local', 'usuario')
+    
+    treinamentos_data = []
+    for treinamento in treinamentos:
+        treinamento_data = {
+            'id': treinamento.id,
+            'local_id': treinamento.local.id if treinamento.local else None,
+            'local_nome': treinamento.local.nome if treinamento.local else '',
+            'usuario_id': treinamento.usuario.id if treinamento.usuario else None,
+            'usuario_nome': treinamento.usuario.nome if treinamento.usuario else '',
+            'data_hora': treinamento.data_hora.strftime('%Y-%m-%d %H:%M:%S') if treinamento.data_hora else None,
+            'status': treinamento.status,
+            'status_display': treinamento.get_status_display(),
+        }
+        treinamentos_data.append(treinamento_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_treinamentos': len(treinamentos_data),
+        'treinamentos': treinamentos_data,
+    }, safe=False)
+
+def rondas_json(request):
+    """Endpoint JSON que retorna todas as informações das rondas."""
+    from rondas.models import Ronda
+    
+    rondas = Ronda.objects.all().select_related('local')
+    
+    rondas_data = []
+    for ronda in rondas:
+        ronda_data = {
+            'id': ronda.id,
+            'local_id': ronda.local.id if ronda.local else None,
+            'local_nome': ronda.local.nome if ronda.local else '',
+            'data_hora': ronda.data_hora.strftime('%Y-%m-%d %H:%M:%S') if ronda.data_hora else None,
+            'status': ronda.status,
+            'status_display': ronda.get_status_display(),
+            'observacoes': ronda.observacoes,
+        }
+        rondas_data.append(ronda_data)
+    
+    return JsonResponse({
+        'success': True,
+        'total_rondas': len(rondas_data),
+        'rondas': rondas_data,
+    }, safe=False)

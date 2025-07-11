@@ -2,7 +2,7 @@
 {% load clientes_filters %}
 {% load static %}
 
-{% block title %}Tech Projects - Cadastro de Clientes{% endblock %}
+{% block title %}GsDeskcontrol - Cadastro de Locais{% endblock %}
 
 {% block extra_css %}
     {{ block.super }}
@@ -25,7 +25,7 @@
         <div id="form-column" class="lg:w-2/5 space-y-6">
             <!-- Client Form -->
             <div class="bg-white rounded-lg shadow-lg p-6 compact-form">
-                <form method="post" action="{% url 'clientes:clientes' %}" id="clienteForm" class="clientes-form">
+                <form method="post" action="{% url 'clientes:locais' %}" id="clienteForm" class="clientes-form">
                     {% csrf_token %}
                     <input type="hidden" name="id" id="cliente_id" value="{{ cliente_id }}">
                     <div class="flex justify-between items-center mb-6">
@@ -39,13 +39,28 @@
                         <input type="text" name="nome" id="nome" class="form-control" required>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pronta Resposta</label>
-                        <input type="text" name="pronta_resposta" id="pronta_resposta" class="form-control">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Responsável <span class='text-red-600'>*</span></label>
+                        <input type="text" name="responsavel" id="responsavel" class="form-control" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
                         <input type="text" name="telefone" id="telefone" class="form-control">
                     </div>
+                    
+                    <!-- Prontas Respostas e Telefones Dinâmicos -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Prontas Respostas e Telefones Adicionais</label>
+                            <button type="button" onclick="abrirAdicionarProntaTelefone()" class="btn-secondary text-sm">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                        <div id="prontas-telefones-container" class="space-y-2">
+                            <!-- Itens dinâmicos serão carregados aqui -->
+                        </div>
+                        <!-- Campos ocultos para arrays, preenchidos pelo JS no submit -->
+                    </div>
+                    
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Produtos e Quantidades</label>
                         <div id="produtos-container">
