@@ -316,6 +316,7 @@ def all_models_json(request):
         app_models = apps.get_app_config(app_label).get_models()
         for model in app_models:
             model_name = model._name_
+            model_name = model.__name__
             model_key = f"{app_label}.{model_name.lower()}"
             
             # Pula os modelos do sistema Django

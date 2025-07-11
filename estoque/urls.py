@@ -33,3 +33,4 @@ urlpatterns = [
     path('treinamentos_json/', views.treinamentos_json, name='treinamentos_json'),
     path('rondas_json/', views.rondas_json, name='rondas_json'),
 ]
+ 
